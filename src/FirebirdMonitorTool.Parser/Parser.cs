@@ -3,14 +3,20 @@ using FirebirdMonitorTool.Interfaces;
 using FirebirdMonitorTool.Parser.Attachment;
 using FirebirdMonitorTool.Parser.Statement;
 using FirebirdMonitorTool.Parser.Transaction;
+using Microsoft.Extensions.Logging;
 
 namespace FirebirdMonitorTool.Parser
 {
     public class Parser : IParser
     {
-        private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger m_Logger;
         private ICommand m_RawCommand;
         private ParsedCommand m_ParsedCommand;
+
+        public Parser(ILogger logger = null)
+        {
+            m_Logger = logger;
+        }
 
         public void SetRawTraceData(ICommand command)
         {
@@ -102,7 +108,7 @@ namespace FirebirdMonitorTool.Parser
 
                     default:
                         m_ParsedCommand = null;
-                        s_Logger.Warn(
+                        m_Logger?.LogWarning(
                             string.Format(
                                 "Unknown Command: {1}{0}Data:{0}{2}",
                                 Environment.NewLine, m_RawCommand.Command, m_RawCommand));
@@ -117,7 +123,7 @@ namespace FirebirdMonitorTool.Parser
                         {
                             return m_ParsedCommand;
                         }
-                        s_Logger.Warn(
+                        m_Logger?.LogWarning(
                             string.Format(
                                 "Parsing failed for command {1}:{0}Original message:{0}{2}",
                                 Environment.NewLine,
@@ -126,13 +132,13 @@ namespace FirebirdMonitorTool.Parser
                     }
                     catch (Exception e)
                     {
-                        s_Logger.Error(
+                        m_Logger?.LogError(
+                            e,
                             string.Format(
                                 "Parsing failed for command {1}:{0}Original message:{0}{2}",
                                 Environment.NewLine,
                                 m_RawCommand.Command,
-                                m_RawCommand.TraceMessage),
-                            e);
+                                m_RawCommand.TraceMessage));
                     }
                 }
             }

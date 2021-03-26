@@ -8,15 +8,12 @@ using FirebirdMonitorTool.Interfaces;
 using FirebirdMonitorTool.Parser;
 using FirebirdSql.Data.FirebirdClient;
 using FirebirdSql.Data.Services;
+using Microsoft.Extensions.Logging;
 
 namespace FirebirdMonitorTool.Monitor
 {
     public class Monitor : IMonitor
     {
-        private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
-
-        private readonly object m_Locker = new object();
-
         private static readonly Regex s_SessionRegex =
             new Regex(
                 @"^Trace session ID (\d+) started",
@@ -27,17 +24,19 @@ namespace FirebirdMonitorTool.Monitor
                 @"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{4})\s+\((\d+):([0-9,A-F]+)\)\s+([\w,\x20]+)\s*$",
                 RegexOptions.Compiled);
 
+        private readonly object m_Locker = new object();
         private readonly FbConnectionStringBuilder m_ConnectionStringBuilder;
         private readonly FbDatabaseTraceConfiguration m_DatabaseTraceConfiguration;
         private readonly int m_WorkerCount;
         private readonly IProcessor[] m_Processors;
+        private readonly ILogger m_Logger;
         private FbTrace m_Trace;
         private ProducerConsumerQueue m_ParserQueue;
         private ProducerConsumerQueue m_ProcessorQueue;
         private Task m_TraceTask;
         private readonly StringBuilder m_TraceMessage = new StringBuilder(16384);
 
-        public Monitor(string traceConnectionString, IProcessor[] processors)
+        public Monitor(string traceConnectionString, IProcessor[] processors, ILogger logger = null)
         {
             if (traceConnectionString == null)
             {
@@ -68,6 +67,7 @@ namespace FirebirdMonitorTool.Monitor
                 };
             m_WorkerCount = Math.Max(1, Math.Min(Environment.ProcessorCount / 2, 8));
             m_Processors = processors;
+            m_Logger = logger;
 
             SessionId = -1;
             RawTraceData = null;
@@ -75,11 +75,6 @@ namespace FirebirdMonitorTool.Monitor
 
         private int SessionId { get; set; }
         private RawTraceData RawTraceData { get; set; }
-
-        private StringBuilder TraceMessage
-        {
-            get { return m_TraceMessage; }
-        }
 
         private static string PrepareDatabasePathForTrace(string path)
         {
@@ -114,11 +109,11 @@ namespace FirebirdMonitorTool.Monitor
                             if (RawTraceData != null)
                             {
                                 var rawTraceData = RawTraceData;
-                                rawTraceData.TraceMessage = TraceMessage.ToString();
+                                rawTraceData.TraceMessage = m_TraceMessage.ToString();
                                 RawTraceData = null;
-                                TraceMessage.Clear();
+                                m_TraceMessage.Clear();
                                 m_ParserQueue.Enqueue(() => ParseAndProcessCommand(rawTraceData))
-                                    .ContinueWith(t => s_Logger.Error("Error parsing and processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+                                    .ContinueWith(t => m_Logger.LogError(t.Exception, "Error parsing and processing command"), TaskContinuationOptions.OnlyOnFaulted);
                             }
                             var timeStamp = DateTime.ParseExact(match.Groups[1].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
                             var serverProcessId = int.Parse(match.Groups[2].Value);
@@ -129,18 +124,18 @@ namespace FirebirdMonitorTool.Monitor
                         else if (RawTraceData != null)
                         {
                             // Append line to current command.
-                            TraceMessage.Append(eventArgs.Message);
+                            m_TraceMessage.Append(eventArgs.Message);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    s_Logger.Error("TraceOnServiceOutput", e);
+                    m_Logger.LogError(e, "TraceOnServiceOutput");
                     if (RawTraceData != null)
                     {
-                        s_Logger.Info(RawTraceData.ToString());
+                        m_Logger.LogInformation(RawTraceData.ToString());
                         RawTraceData = null;
-                        TraceMessage.Clear();
+                        m_TraceMessage.Clear();
                     }
                 }
             }
@@ -155,7 +150,7 @@ namespace FirebirdMonitorTool.Monitor
             }
 
             // Log command as Trace
-            s_Logger.Trace(
+            m_Logger.LogTrace(
                 string.Format(
                     "{0}Timestamp: {1}{0}ServerProcessId: {2}{0}InternalTraceId: {3}{0}Command: {4}{0}Data:{5}{0}{0}",
                     Environment.NewLine,
@@ -177,7 +172,7 @@ namespace FirebirdMonitorTool.Monitor
             if (command != null)
             {
                 m_ProcessorQueue.Enqueue(() => ProcessCommand(command))
-                    .ContinueWith(t => s_Logger.Error("Error processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+                    .ContinueWith(t => m_Logger.LogError(t.Exception, "Error processing command"), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -191,7 +186,7 @@ namespace FirebirdMonitorTool.Monitor
                 }
                 catch (Exception e)
                 {
-                    s_Logger.Error(string.Format("IProcessor failed of type {0}", processor.GetType().FullName), e);
+                    m_Logger.LogError(e, string.Format("IProcessor failed of type {0}", processor.GetType().FullName));
                 }
             }
         }
@@ -199,7 +194,7 @@ namespace FirebirdMonitorTool.Monitor
         private void OnStartTrace()
         {
             m_Trace.Start(string.Format("FirebirdMonitorTool {0}", DateTime.Now));
-            s_Logger.Info(@"Trace stream is stopped ...");
+            m_Logger.LogInformation(@"Trace stream is stopped ...");
             Close();
         }
 
@@ -210,14 +205,14 @@ namespace FirebirdMonitorTool.Monitor
             {
                 if (m_ParserQueue != null)
                 {
-                    s_Logger.Info("Flushing last trace message to ParserQueue ...");
+                    m_Logger.LogInformation("Flushing last trace message to ParserQueue ...");
                     var rawData = RawTraceData;
-                    rawData.TraceMessage = TraceMessage.ToString();
+                    rawData.TraceMessage = m_TraceMessage.ToString();
                     m_ParserQueue.Enqueue(() => ParseAndProcessCommand(rawData))
-                        .ContinueWith(t => s_Logger.Error("Error parsing and processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+                        .ContinueWith(t => m_Logger.LogError(t.Exception, "Error parsing and processing command"), TaskContinuationOptions.OnlyOnFaulted);
                 }
                 RawTraceData = null;
-                TraceMessage.Clear();
+                m_TraceMessage.Clear();
             }
 
             // Unwind all
@@ -232,12 +227,12 @@ namespace FirebirdMonitorTool.Monitor
             {
                 try
                 {
-                    s_Logger.Info("Shutting down ParserQueue ...");
+                    m_Logger.LogInformation("Shutting down ParserQueue ...");
                     m_ParserQueue.Dispose(TimeSpan.FromSeconds(60));
                 }
                 catch (Exception e)
                 {
-                    s_Logger.Error("Failed to shutdown ParserQueue", e);
+                    m_Logger.LogError(e, "Failed to shutdown ParserQueue");
                 }
                 m_ParserQueue = null;
             }
@@ -246,12 +241,12 @@ namespace FirebirdMonitorTool.Monitor
             {
                 try
                 {
-                    s_Logger.Info("Shutting down ProcessorQueue ...");
+                    m_Logger.LogInformation("Shutting down ProcessorQueue ...");
                     m_ProcessorQueue.Dispose(TimeSpan.FromSeconds(60));
                 }
                 catch (Exception e)
                 {
-                    s_Logger.Error("Failed to shutdown ProcessorQueue", e);
+                    m_Logger.LogError(e, "Failed to shutdown ProcessorQueue");
                 }
                 m_ProcessorQueue = null;
             }
@@ -261,10 +256,10 @@ namespace FirebirdMonitorTool.Monitor
 
         private void FinishProcessors()
         {
-            s_Logger.Info("Finishing processors ...");
+            m_Logger.LogInformation("Finishing processors ...");
             foreach (var processor in m_Processors)
             {
-                s_Logger.Info(processor.GetType().FullName);
+                m_Logger.LogInformation(processor.GetType().FullName);
                 try
                 {
                     if (processor.CanFlush)
@@ -275,7 +270,7 @@ namespace FirebirdMonitorTool.Monitor
                 }
                 catch (Exception e)
                 {
-                    s_Logger.Error(string.Format("Cleanup processor of type {0}", processor.GetType().FullName), e);
+                    m_Logger.LogError(e, string.Format("Cleanup processor of type {0}", processor.GetType().FullName));
                 }
             }
         }
@@ -288,7 +283,7 @@ namespace FirebirdMonitorTool.Monitor
                 {
                     if (m_ConnectionStringBuilder != null && SessionId <= 0)
                     {
-                        s_Logger.Info(
+                        m_Logger.LogInformation(
                             string.Format(
                                 @"Starting trace ...{0}{1}",
                                 Environment.NewLine,
@@ -302,7 +297,7 @@ namespace FirebirdMonitorTool.Monitor
                         m_ParserQueue = new ProducerConsumerQueue(m_WorkerCount);
                         m_ProcessorQueue = new ProducerConsumerQueue(1);
                         RawTraceData = null;
-                        TraceMessage.Clear();
+                        m_TraceMessage.Clear();
                         m_Trace.ServiceOutput += TraceOnServiceOutput;
                         m_TraceTask = Task.Factory.StartNew(OnStartTrace, TaskCreationOptions.LongRunning);
                     }
@@ -310,7 +305,7 @@ namespace FirebirdMonitorTool.Monitor
             }
             catch (Exception e)
             {
-                s_Logger.Error("Start", e);
+                m_Logger.LogError(e, "Start");
                 throw;
             }
         }
@@ -325,7 +320,7 @@ namespace FirebirdMonitorTool.Monitor
                 {
                     if (SessionId > 0)
                     {
-                        s_Logger.Info(@"Stopping trace ...");
+                        m_Logger.LogInformation(@"Stopping trace ...");
 
                         // Ask firebird server to stop tracing
                         var trace = new FbTrace
@@ -342,12 +337,12 @@ namespace FirebirdMonitorTool.Monitor
                 // wait max. 1 min
                 if (task != null && !task.Wait(TimeSpan.FromSeconds(120)))
                 {
-                    s_Logger.Warn("Trace listener didn't stop within 120 seconds.");
+                    m_Logger.LogWarning("Trace listener didn't stop within 120 seconds.");
                 }
             }
             catch (Exception e)
             {
-                s_Logger.Error("Stop", e);
+                m_Logger.LogError(e, "Stop");
                 throw;
             }
         }

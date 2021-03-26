@@ -6,8 +6,6 @@ namespace FirebirdMonitorTool.Parser.Common
 {
     public sealed class ParseTableCounts
     {
-        private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
-
         private const string s_Line1 = "Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge";
         private const string s_Line2 = "***************************************************************************************************************";
 
@@ -22,16 +20,10 @@ namespace FirebirdMonitorTool.Parser.Common
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
-                long result;
-                if (!long.TryParse(value, out result))
+                if (long.TryParse(value, out var result))
                 {
-                    s_Logger.Warn(
-                        string.Format(
-                            "Unable to parse a TableCount from {0}",
-                            value));
-                    return null;
+                    return result;
                 }
-                return result;
             }
             return null;
         }
