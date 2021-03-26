@@ -118,7 +118,7 @@ namespace FirebirdMonitorTool.Monitor
                         var match = s_SessionRegex.Match(eventArgs.Message);
                         if (match.Success)
                         {
-                            SessionId = Int32.Parse(match.Groups[1].Value);
+                            SessionId = int.Parse(match.Groups[1].Value);
                         }
                     }
                     else
@@ -137,8 +137,8 @@ namespace FirebirdMonitorTool.Monitor
                                     .ContinueWith(t => s_Logger.Error("Error parsing and processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
                             }
                             var timeStamp = DateTime.ParseExact(match.Groups[1].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
-                            var serverProcessId = Int32.Parse(match.Groups[2].Value);
-                            var internalTraceId = Int64.Parse(match.Groups[3].Value, NumberStyles.HexNumber);
+                            var serverProcessId = int.Parse(match.Groups[2].Value);
+                            var internalTraceId = long.Parse(match.Groups[3].Value, NumberStyles.HexNumber);
                             var command = match.Groups[4].Value;
                             RawTraceData = new RawTraceData(SessionId, timeStamp, serverProcessId, internalTraceId, command);
                         }
