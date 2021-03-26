@@ -6,17 +6,11 @@ namespace FirebirdMonitorTool.Parser
 {
     public abstract class ParsedCommand : ICommand
     {
-        #region Fields
-
         private readonly ICommand m_RawRawCommand;
 
         private readonly StringBuilder m_WorkingMessage;
         private bool m_MessageCached;
         private string m_MessageCache;
-
-        #endregion
-
-        #region Constructor
 
         protected ParsedCommand(ICommand rawCommand)
         {
@@ -24,15 +18,7 @@ namespace FirebirdMonitorTool.Parser
             m_WorkingMessage = new StringBuilder(m_RawRawCommand.TraceMessage);
         }
 
-        #endregion
-
-        #region Abstract members
-
         public abstract bool Parse();
-
-        #endregion
-
-        #region Protected members
 
         public long SessionId
         {
@@ -86,7 +72,5 @@ namespace FirebirdMonitorTool.Parser
                 m_MessageCached = false;
             }
         }
-
-        #endregion
     }
 }

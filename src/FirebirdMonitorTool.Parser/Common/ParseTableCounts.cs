@@ -6,8 +6,6 @@ namespace FirebirdMonitorTool.Parser.Common
 {
     public sealed class ParseTableCounts
     {
-        #region Fields
-
         private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
 
         private const string s_Line1 = "Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge";
@@ -15,18 +13,10 @@ namespace FirebirdMonitorTool.Parser.Common
 
         private readonly string m_Message;
 
-        #endregion
-
-        #region Constructors
-
         public ParseTableCounts(string message)
         {
             m_Message = message;
         }
-
-        #endregion
-
-        #region Private members
 
         private static long? GetLongValue(string value)
         {
@@ -75,10 +65,6 @@ namespace FirebirdMonitorTool.Parser.Common
             }
         }
 
-        #endregion
-
-        #region Public members
-
         public TableCount[] TableCounts { get; private set; }
 
         public bool Parse()
@@ -93,7 +79,5 @@ namespace FirebirdMonitorTool.Parser.Common
             }
             return false;
         }
-
-        #endregion
     }
 }

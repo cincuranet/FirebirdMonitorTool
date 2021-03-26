@@ -7,28 +7,16 @@ namespace FirebirdMonitorTool.UnitTests
 {
     public abstract class AbstractParserTests
     {
-        #region Embedded class
-
         protected class MockTraceData : ICommand
         {
-            #region Fields
-
             private readonly string m_Command;
             private readonly string m_Message;
-
-            #endregion
-
-            #region Constructor
 
             public MockTraceData(string command, string message)
             {
                 m_Command = command;
                 m_Message = message;
             }
-
-            #endregion
-
-            #region Implementation of ICommand
 
             public long SessionId
             {
@@ -59,22 +47,12 @@ namespace FirebirdMonitorTool.UnitTests
             {
                 get { return m_Message; }
             }
-
-            #endregion
         }
-
-        #endregion
-
-        #region Constructor
 
         public AbstractParserTests()
         {
             Environment.CurrentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
-
-        #endregion
-
-        #region Consts
 
         protected const string AttachDatabase = "ATTACH_DATABASE";
         protected const string DetachDatabase = "DETACH_DATABASE";
@@ -85,7 +63,5 @@ namespace FirebirdMonitorTool.UnitTests
 
         protected const string PrepareStatement = "PREPARE_STATEMENT";
         protected const string ExecuteStatementFinish = "EXECUTE_STATEMENT_FINISH";
-
-        #endregion
     }
 }

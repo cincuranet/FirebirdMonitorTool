@@ -4,8 +4,6 @@ namespace FirebirdMonitorTool.Parser.Common
 {
     public class TableCount : ITableCount
     {
-        #region Fields
-
         private readonly string m_Name;
         private readonly long? m_Natural;
         private readonly long? m_Index;
@@ -15,10 +13,6 @@ namespace FirebirdMonitorTool.Parser.Common
         private readonly long? m_Backout;
         private readonly long? m_Purge;
         private readonly long? m_Expunge;
-
-        #endregion
-
-        #region Constructor
 
         public TableCount(string name, long? natural, long? index, long? update, long? insert, long? delete, long? backout, long? purge, long? expunge)
         {
@@ -32,10 +26,6 @@ namespace FirebirdMonitorTool.Parser.Common
             m_Purge = purge;
             m_Expunge = expunge;
         }
-
-        #endregion
-
-        #region Public properties
 
         public long? Expunge
         {
@@ -82,10 +72,6 @@ namespace FirebirdMonitorTool.Parser.Common
             get { return m_Name; }
         }
 
-        #endregion
-
-        #region Overrides
-
         public override string ToString()
         {
             return string.Format(
@@ -100,7 +86,5 @@ namespace FirebirdMonitorTool.Parser.Common
                 m_Purge,
                 m_Expunge);
         }
-
-        #endregion
     }
 }

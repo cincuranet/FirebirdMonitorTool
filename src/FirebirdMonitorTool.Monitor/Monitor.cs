@@ -13,8 +13,6 @@ namespace FirebirdMonitorTool.Monitor
 {
     public class Monitor : IMonitor
     {
-        #region Fields
-
         private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
 
         private readonly object m_Locker = new object();
@@ -38,10 +36,6 @@ namespace FirebirdMonitorTool.Monitor
         private ProducerConsumerQueue m_ProcessorQueue;
         private Task m_TraceTask;
         private readonly StringBuilder m_TraceMessage = new StringBuilder(16384);
-
-        #endregion
-
-        #region Constructor
 
         public Monitor(string traceConnectionString, IProcessor[] processors)
         {
@@ -79,12 +73,6 @@ namespace FirebirdMonitorTool.Monitor
             RawTraceData = null;
         }
 
-        #endregion
-
-        #region Private members
-
-        #region Properties
-
         private int SessionId { get; set; }
         private RawTraceData RawTraceData { get; set; }
 
@@ -92,10 +80,6 @@ namespace FirebirdMonitorTool.Monitor
         {
             get { return m_TraceMessage; }
         }
-
-        #endregion
-
-        #region Methods
 
         private static string PrepareDatabasePathForTrace(string path)
         {
@@ -296,12 +280,6 @@ namespace FirebirdMonitorTool.Monitor
             }
         }
 
-        #endregion
-
-        #endregion
-
-        #region Public members
-
         public void Start()
         {
             try
@@ -374,10 +352,6 @@ namespace FirebirdMonitorTool.Monitor
             }
         }
 
-        #endregion
-
-        #region Implementation of IDisposable
-
         public void Dispose()
         {
             // ReSharper disable EmptyGeneralCatchClause
@@ -390,7 +364,5 @@ namespace FirebirdMonitorTool.Monitor
             }
             // ReSharper restore EmptyGeneralCatchClause
         }
-
-        #endregion
     }
 }

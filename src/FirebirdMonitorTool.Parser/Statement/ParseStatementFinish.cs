@@ -8,16 +8,10 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     public sealed class ParseStatementFinish : ParseStatementTransaction, IStatementFinish
     {
-        #region Constructor
-
         public ParseStatementFinish(ICommand rawCommand)
             : base(rawCommand)
         {
         }
-
-        #endregion
-
-        #region Public properties
 
         public long StatementId { get; private set; }
         public string Text { get; private set; }
@@ -30,10 +24,6 @@ namespace FirebirdMonitorTool.Parser.Statement
         public long? Writes { get; private set; }
         public long? Fetches { get; private set; }
         public long? Marks { get; private set; }
-
-        #endregion
-
-        #region Overrides of ParseTransactionStart
 
         public override bool Parse()
         {
@@ -81,7 +71,5 @@ namespace FirebirdMonitorTool.Parser.Statement
 
             return result;
         }
-
-        #endregion
     }
 }

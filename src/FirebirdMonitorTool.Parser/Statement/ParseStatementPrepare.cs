@@ -7,25 +7,15 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     public sealed class ParseStatementPrepare : ParseStatementTransaction, IStatementPrepare
     {
-        #region Constructor
-
         public ParseStatementPrepare(ICommand rawCommand)
             : base(rawCommand)
         {
         }
 
-        #endregion
-
-        #region Public properties
-
         public long StatementId { get; private set; }
         public string Text { get; private set; }
         public string Plan { get; private set; }
         public TimeSpan ElapsedTime { get; private set; }
-
-        #endregion
-
-        #region Overrides of ParseTransactionStart
 
         public override bool Parse()
         {
@@ -48,7 +38,5 @@ namespace FirebirdMonitorTool.Parser.Statement
 
             return result;
         }
-
-        #endregion
     }
 }

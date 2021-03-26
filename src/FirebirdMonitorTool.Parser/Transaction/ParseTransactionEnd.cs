@@ -7,26 +7,16 @@ namespace FirebirdMonitorTool.Parser.Transaction
 {
     public sealed class ParseTransactionEnd : ParseTransaction, ITransactionEnd
     {
-        #region Constructor
-
         public ParseTransactionEnd(ICommand rawCommand)
             : base(rawCommand)
         {
         }
-
-        #endregion
-
-        #region Public properties
 
         public TimeSpan ElapsedTime { get; private set; }
         public long? Reads { get; private set; }
         public long? Writes { get; private set; }
         public long? Fetches { get; private set; }
         public long? Marks { get; private set; }
-
-        #endregion
-
-        #region Overrides of ParseTransaction
 
         public override bool Parse()
         {
@@ -50,7 +40,5 @@ namespace FirebirdMonitorTool.Parser.Transaction
 
             return result;
         }
-
-        #endregion
     }
 }

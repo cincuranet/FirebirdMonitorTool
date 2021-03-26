@@ -9,8 +9,6 @@ namespace FirebirdMonitorTool.Parser.Transaction
 {
     public abstract class ParseTransaction : ParseAttachment, ITransaction
     {
-        #region Fields
-
         private static readonly Regex s_Regex =
             new Regex(
                 @"^\s*\(TRA_(?<TransactionId>\d+),\s(?<IsolationParams>[\w,\d,\|, ]+)\)",
@@ -21,18 +19,10 @@ namespace FirebirdMonitorTool.Parser.Transaction
                 @"^\s*WAIT\s(?<Number>\d+)",
                 RegexOptions.Compiled);
 
-        #endregion
-
-        #region Constructor
-
         protected ParseTransaction(ICommand rawCommand)
             : base(rawCommand)
         {
         }
-
-        #endregion
-
-        #region Public properties
 
         public long TransactionId { get; private set; }
         public string IsolationMode { get; private set; }
@@ -40,10 +30,6 @@ namespace FirebirdMonitorTool.Parser.Transaction
         public bool Wait { get; private set; }
         public TimeSpan? WaitTime { get; private set; }
         public bool ReadOnly { get; private set; }
-
-        #endregion
-
-        #region Overrides of ParsedCommand
 
         public override bool Parse()
         {
@@ -98,7 +84,5 @@ namespace FirebirdMonitorTool.Parser.Transaction
 
             return result;
         }
-
-        #endregion
     }
 }

@@ -5,8 +5,6 @@ namespace FirebirdMonitorTool.Parser.Common
 {
 	public sealed class ParseCounters
 	{
-		#region Fields
-
 		private static readonly Regex s_Regex =
 			new Regex(
 				@"^\s*(?<ElapsedTime>\d+)\sms(\,\s*(?<Number>\d+)\s(?<Type>read\(s\)|write\(s\)|fetch\(es\)|mark\(s\)))*",
@@ -14,18 +12,10 @@ namespace FirebirdMonitorTool.Parser.Common
 
 		private readonly string m_Message;
 
-		#endregion
-
-		#region Constructors
-
 		public ParseCounters(string message)
 		{
 			m_Message = message;
 		}
-
-		#endregion
-
-		#region Public members
 
 		public string Message
 		{
@@ -74,7 +64,5 @@ namespace FirebirdMonitorTool.Parser.Common
 			}
 			return match.Success;
 		}
-
-		#endregion
 	}
 }

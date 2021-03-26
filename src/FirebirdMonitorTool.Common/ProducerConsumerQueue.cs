@@ -91,13 +91,9 @@ namespace FirebirdMonitorTool.Common
             }
         }
 
-        #region Implementation of IDisposable
-
         public void Dispose()
         {
             Dispose(TimeSpan.MaxValue);
         }
-
-        #endregion
     }
 }

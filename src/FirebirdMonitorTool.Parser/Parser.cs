@@ -8,15 +8,9 @@ namespace FirebirdMonitorTool.Parser
 {
     public class Parser : IParser
     {
-        #region Fields
-
         private static readonly Logger s_Logger = LogManager.GetCurrentClassLogger();
         private ICommand m_RawCommand;
         private ParsedCommand m_ParsedCommand;
-
-        #endregion
-
-        #region Implementation of IParser
 
         public void SetRawTraceData(ICommand command)
         {
@@ -144,7 +138,5 @@ namespace FirebirdMonitorTool.Parser
             }
             return null;
         }
-
-        #endregion
     }
 }

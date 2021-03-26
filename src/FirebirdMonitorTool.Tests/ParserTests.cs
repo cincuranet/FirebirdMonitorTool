@@ -14,8 +14,6 @@ namespace FirebirdMonitorTool.UnitTests
     [Category("Parser")]
     public class ParserTests : AbstractParserTests
     {
-        #region Attachment
-
         [Test]
         public void RawTraceData_AttachDatabase_Start()
         {
@@ -57,10 +55,6 @@ namespace FirebirdMonitorTool.UnitTests
             Assert.AreEqual(@"D:\Firebird\Firebird-2.5.2.26539-0_x64-3050\bin\isql.exe", detachAttacmentCommand.RemoteProcessName);
             Assert.AreEqual(8688L, detachAttacmentCommand.RemoteProcessId);
         }
-
-        #endregion
-
-        #region Transaction
 
         [Test]
         public void RawTraceData_StartTransaction_Concurreny()
@@ -120,10 +114,6 @@ namespace FirebirdMonitorTool.UnitTests
             Assert.AreEqual(1L, endTransactionCommand.Fetches);
             Assert.AreEqual(1L, endTransactionCommand.Marks);
         }
-
-        #endregion
-
-        #region Statement
 
         [Test]
         public void RawTraceData_Statement_Prepare_Plan_NoParams_NoTableCount()
@@ -286,7 +276,5 @@ namespace FirebirdMonitorTool.UnitTests
             Assert.AreEqual(3645L, finishStatementCommand.Fetches);
             Assert.AreEqual(9L, finishStatementCommand.Marks);
         }
-
-        #endregion
     }
 }

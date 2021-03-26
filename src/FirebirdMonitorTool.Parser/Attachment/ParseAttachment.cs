@@ -7,25 +7,15 @@ namespace FirebirdMonitorTool.Parser.Attachment
 {
     public abstract class ParseAttachment : ParsedCommand, IAttachment
     {
-        #region Fields
-
         private static readonly Regex s_Regex =
             new Regex(
                 @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+):(?<Role>.+),\s(?<Charset>.+),\s(?<RemoteProtocol>.+):(?<RemoteAddress>.+)\)\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+)\s+(?=\(TRA_|Statement|\s*)",
                 RegexOptions.Compiled);
 
-        #endregion
-
-        #region Constructor
-
         protected ParseAttachment(ICommand rawCommand)
             : base(rawCommand)
         {
         }
-
-        #endregion
-
-        #region Public properties
 
         public string DatabaseName { get; private set; }
         public long ConnectionId { get; private set; }
@@ -36,10 +26,6 @@ namespace FirebirdMonitorTool.Parser.Attachment
         public string RemoteAddress { get; private set; }
         public string RemoteProcessName { get; private set; }
         public long RemoteProcessId { get; private set; }
-
-        #endregion
-
-        #region Overrides of ParsedCommand
 
         public override bool Parse()
         {
@@ -60,7 +46,5 @@ namespace FirebirdMonitorTool.Parser.Attachment
             }
             return result;
         }
-
-        #endregion
     }
 }

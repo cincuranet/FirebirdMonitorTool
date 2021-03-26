@@ -7,18 +7,12 @@ namespace FirebirdMonitorTool.Parser.Common
 {
     public sealed class ParseStatement
     {
-        #region Embedded classes
-
         public enum Option
         {
             NONE = 1,
             RECORDS_FETCHED,
             ELAPSED_TIME
         }
-
-        #endregion
-
-        #region Fields
 
         private static readonly string s_PlanSeparator;
 
@@ -44,10 +38,6 @@ namespace FirebirdMonitorTool.Parser.Common
 
         private readonly string m_Message;
 
-        #endregion
-
-        #region Constructors
-
         static ParseStatement()
         {
             s_PlanSeparator = new string('^', 79);
@@ -58,10 +48,6 @@ namespace FirebirdMonitorTool.Parser.Common
             m_Message = message;
         }
 
-        #endregion
-
-        #region Private members
-
         private static IEnumerable<string> GetParams(string text)
         {
             return from line in text.Split(new[] { '\n', '\r' })
@@ -70,10 +56,6 @@ namespace FirebirdMonitorTool.Parser.Common
                    where match.Success
                    select match.Groups[1].Value;
         }
-
-        #endregion
-
-        #region Public properties
 
         public string Message
         {
@@ -155,7 +137,5 @@ namespace FirebirdMonitorTool.Parser.Common
 
 			return statementMatch.Success;
         }
-
-        #endregion
     }
 }
