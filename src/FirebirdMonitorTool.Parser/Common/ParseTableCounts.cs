@@ -56,20 +56,20 @@ namespace FirebirdMonitorTool.Parser.Common
             // 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
             // T_FACEBOOK_USER                                1860                                                            
             // T_WEB_SITE                                        2                                                            
-            foreach (string line in lines)
+            foreach (var line in lines)
             {
-                string tableCounts = line.TrimStart();
+                var tableCounts = line.TrimStart();
                 if (tableCounts.Length == 111)
                 {
-                    string name = tableCounts.Substring(0, 31).TrimEnd();
-                    long? natural = GetLongValue(tableCounts.Substring(31, 10));
-                    long? index = GetLongValue(tableCounts.Substring(41, 10));
-                    long? update = GetLongValue(tableCounts.Substring(51, 10));
-                    long? insert = GetLongValue(tableCounts.Substring(61, 10));
-                    long? delete = GetLongValue(tableCounts.Substring(71, 10));
-                    long? backout = GetLongValue(tableCounts.Substring(81, 10));
-                    long? purge = GetLongValue(tableCounts.Substring(91, 10));
-                    long? expunge = GetLongValue(tableCounts.Substring(101, 10));
+                    var name = tableCounts.Substring(0, 31).TrimEnd();
+                    var natural = GetLongValue(tableCounts.Substring(31, 10));
+                    var index = GetLongValue(tableCounts.Substring(41, 10));
+                    var update = GetLongValue(tableCounts.Substring(51, 10));
+                    var insert = GetLongValue(tableCounts.Substring(61, 10));
+                    var delete = GetLongValue(tableCounts.Substring(71, 10));
+                    var backout = GetLongValue(tableCounts.Substring(81, 10));
+                    var purge = GetLongValue(tableCounts.Substring(91, 10));
+                    var expunge = GetLongValue(tableCounts.Substring(101, 10));
                     yield return new TableCount(name, natural, index, update, insert, delete, backout, purge, expunge);
                 }
             }
@@ -83,7 +83,7 @@ namespace FirebirdMonitorTool.Parser.Common
 
         public bool Parse()
         {
-            string[] strings = m_Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var strings = m_Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (strings.Length > 2
                 && strings[0].EndsWith(s_Line1, StringComparison.InvariantCulture)
                 && strings[1].EndsWith(s_Line2, StringComparison.InvariantCulture))

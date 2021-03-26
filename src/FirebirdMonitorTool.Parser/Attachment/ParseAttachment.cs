@@ -43,8 +43,8 @@ namespace FirebirdMonitorTool.Parser.Attachment
 
         public override bool Parse()
         {
-            Match match = s_Regex.Match(Message);
-            bool result = match.Success;
+            var match = s_Regex.Match(Message);
+            var result = match.Success;
             if (result)
             {
                 DatabaseName = match.Groups["DatabaseName"].Value;

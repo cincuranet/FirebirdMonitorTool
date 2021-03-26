@@ -24,7 +24,7 @@ namespace FirebirdMonitorTool.UnitTests
             ICommand rawTraceData = new MockTraceData(AttachDatabase, Message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            IAttachmentStart attachDatabaseCommand = parser.Parse() as IAttachmentStart;
+            var attachDatabaseCommand = parser.Parse() as IAttachmentStart;
             Assert.IsNotNull(attachDatabaseCommand);
             Assert.AreEqual("GoOnline", attachDatabaseCommand.DatabaseName);
             Assert.AreEqual(108L, attachDatabaseCommand.ConnectionId);
@@ -45,7 +45,7 @@ namespace FirebirdMonitorTool.UnitTests
             ICommand rawTraceData = new MockTraceData(DetachDatabase, Message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            IAttachmentEnd detachAttacmentCommand = parser.Parse() as IAttachmentEnd;
+            var detachAttacmentCommand = parser.Parse() as IAttachmentEnd;
             Assert.IsNotNull(detachAttacmentCommand);
             Assert.AreEqual("GoOnline", detachAttacmentCommand.DatabaseName);
             Assert.AreEqual(107L, detachAttacmentCommand.ConnectionId);
@@ -71,7 +71,7 @@ namespace FirebirdMonitorTool.UnitTests
             ICommand rawTraceData = new MockTraceData(StartTransaction, Message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            ITransactionStart startTransactionCommand = parser.Parse() as ITransactionStart;
+            var startTransactionCommand = parser.Parse() as ITransactionStart;
             Assert.IsNotNull(startTransactionCommand);
             Assert.AreEqual(7437L, startTransactionCommand.TransactionId);
             Assert.AreEqual(108L, startTransactionCommand.ConnectionId);
@@ -91,7 +91,7 @@ namespace FirebirdMonitorTool.UnitTests
             ICommand rawTraceData = new MockTraceData(StartTransaction, Message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            ITransactionStart startTransactionCommand = parser.Parse() as ITransactionStart;
+            var startTransactionCommand = parser.Parse() as ITransactionStart;
             Assert.IsNotNull(startTransactionCommand);
             Assert.AreEqual(7438L, startTransactionCommand.TransactionId);
             Assert.AreEqual(108L, startTransactionCommand.ConnectionId);
@@ -112,7 +112,7 @@ namespace FirebirdMonitorTool.UnitTests
             ICommand rawTraceData = new MockTraceData(CommitTransaction, Message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            ITransactionEnd endTransactionCommand = parser.Parse() as ITransactionEnd;
+            var endTransactionCommand = parser.Parse() as ITransactionEnd;
             Assert.IsNotNull(endTransactionCommand);
             Assert.AreEqual(35, endTransactionCommand.ElapsedTime.TotalMilliseconds);
             Assert.AreEqual(1L, endTransactionCommand.Reads);
@@ -128,11 +128,11 @@ namespace FirebirdMonitorTool.UnitTests
         [Test]
         public void RawTraceData_Statement_Prepare_Plan_NoParams_NoTableCount()
         {
-            string message = File.ReadAllText(@"Messages\RawTraceData_Statement_Prepare_Plan_NoParams_NoTableCount.txt");
+            var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Prepare_Plan_NoParams_NoTableCount.txt");
             ICommand rawTraceData = new MockTraceData(PrepareStatement, message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            IStatementPrepare prepareStatementCommand = parser.Parse() as IStatementPrepare;
+            var prepareStatementCommand = parser.Parse() as IStatementPrepare;
             Assert.IsNotNull(prepareStatementCommand);
             Assert.AreEqual(34L, prepareStatementCommand.StatementId);
             Assert.AreEqual("select * from rdb$database", prepareStatementCommand.Text);
@@ -143,11 +143,11 @@ namespace FirebirdMonitorTool.UnitTests
         [Test]
         public void RawTraceData_Statement_Start_Plan_NoParams_TableCounts()
         {
-            string message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_Plan_NoParams_TableCounts.txt");
+            var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_Plan_NoParams_TableCounts.txt");
             ICommand rawTraceData = new MockTraceData(ExecuteStatementFinish, message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            IStatementFinish finishStatementCommand = parser.Parse() as IStatementFinish;
+            var finishStatementCommand = parser.Parse() as IStatementFinish;
             Assert.IsNotNull(finishStatementCommand);
             Assert.AreEqual(37L, finishStatementCommand.StatementId);
             Assert.AreEqual(@"select cast(1 as integer), cast(d.rdb$character_set_name as varchar(64)), cast(c.rdb$default_collate_name as varchar(64))
@@ -223,11 +223,11 @@ namespace FirebirdMonitorTool.UnitTests
         [Test]
         public void RawTraceData_Statement_Start_NoPlan_Params_TableCounts()
         {
-            string message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_NoPlan_Params_TableCounts.txt");
+            var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_NoPlan_Params_TableCounts.txt");
             ICommand rawTraceData = new MockTraceData(ExecuteStatementFinish, message);
             IParser parser = new Parser.Parser();
             parser.SetRawTraceData(rawTraceData);
-            IStatementFinish finishStatementCommand = parser.Parse() as IStatementFinish;
+            var finishStatementCommand = parser.Parse() as IStatementFinish;
             Assert.IsNotNull(finishStatementCommand);
             Assert.AreEqual(625L, finishStatementCommand.StatementId);
             Assert.AreEqual(@"execute procedure SYNC_RACE_STAT_IU(?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  , ?  )", finishStatementCommand.Text);

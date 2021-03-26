@@ -30,11 +30,11 @@ namespace FirebirdMonitorTool.Parser.Transaction
 
         public override bool Parse()
         {
-            bool result = base.Parse();
+            var result = base.Parse();
 
             if (result)
             {
-                ParseCounters counters = new ParseCounters(Message);
+                var counters = new ParseCounters(Message);
                 result = counters.Parse();
                 if (result)
                 {

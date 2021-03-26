@@ -30,7 +30,7 @@ namespace FirebirdMonitorTool.Common
             workerCount = Math.Max(1, workerCount);
 
             m_Workers = new Task[workerCount];
-            for (int i = 0; i < workerCount; i++)
+            for (var i = 0; i < workerCount; i++)
             {
                 m_Workers[i] = Task.Factory.StartNew(Consume, TaskCreationOptions.LongRunning);
             }
@@ -43,7 +43,7 @@ namespace FirebirdMonitorTool.Common
                 throw new ArgumentNullException(nameof(action));
             }
 
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>();
             m_WorkItems.Add(new WorkItem(tcs, action, cancelationToken));
             return tcs.Task;
         }
@@ -67,8 +67,8 @@ namespace FirebirdMonitorTool.Common
 
         private void Consume()
         {
-            IEnumerable<WorkItem> items = m_WorkItems.GetConsumingEnumerable();
-            foreach (WorkItem workItem in items)
+            var items = m_WorkItems.GetConsumingEnumerable();
+            foreach (var workItem in items)
             {
                 if (workItem.CancelationToken.HasValue
                     && workItem.CancelationToken.Value.IsCancellationRequested)

@@ -115,7 +115,7 @@ namespace FirebirdMonitorTool.Monitor
                     // First work is finding out the SessionId
                     if (SessionId <= 0)
                     {
-                        Match match = s_SessionRegex.Match(eventArgs.Message);
+                        var match = s_SessionRegex.Match(eventArgs.Message);
                         if (match.Success)
                         {
                             SessionId = Int32.Parse(match.Groups[1].Value);
@@ -124,22 +124,22 @@ namespace FirebirdMonitorTool.Monitor
                     else
                     {
                         // Is it the start of a new command?
-                        Match match = s_StartOfTrace.Match(eventArgs.Message);
+                        var match = s_StartOfTrace.Match(eventArgs.Message);
                         if (match.Success)
                         {
                             if (RawTraceData != null)
                             {
-                                RawTraceData rawTraceData = RawTraceData;
+                                var rawTraceData = RawTraceData;
                                 rawTraceData.TraceMessage = TraceMessage.ToString();
                                 RawTraceData = null;
                                 TraceMessage.Clear();
                                 m_ParserQueue.Enqueue(() => ParseAndProcessCommand(rawTraceData))
                                     .ContinueWith(t => s_Logger.Error("Error parsing and processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
                             }
-                            DateTime timeStamp = DateTime.ParseExact(match.Groups[1].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
-                            int serverProcessId = Int32.Parse(match.Groups[2].Value);
-                            long internalTraceId = Int64.Parse(match.Groups[3].Value, NumberStyles.HexNumber);
-                            string command = match.Groups[4].Value;
+                            var timeStamp = DateTime.ParseExact(match.Groups[1].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
+                            var serverProcessId = Int32.Parse(match.Groups[2].Value);
+                            var internalTraceId = Int64.Parse(match.Groups[3].Value, NumberStyles.HexNumber);
+                            var command = match.Groups[4].Value;
                             RawTraceData = new RawTraceData(SessionId, timeStamp, serverProcessId, internalTraceId, command);
                         }
                         else if (RawTraceData != null)
@@ -187,7 +187,7 @@ namespace FirebirdMonitorTool.Monitor
             // Prepare instance for parsing and persisting
             parser.SetRawTraceData(rawCommand);
             // parse on this thread
-            ICommand command = parser.Parse();
+            var command = parser.Parse();
 
             // Process on another queue (this queue will always has ONE worker, so processing will be done sequentially)
             if (command != null)
@@ -199,7 +199,7 @@ namespace FirebirdMonitorTool.Monitor
 
         private void ProcessCommand(ICommand command)
         {
-            foreach (IProcessor processor in m_Processors)
+            foreach (var processor in m_Processors)
             {
                 try
                 {
@@ -227,7 +227,7 @@ namespace FirebirdMonitorTool.Monitor
                 if (m_ParserQueue != null)
                 {
                     s_Logger.Info("Flushing last trace message to ParserQueue ...");
-                    RawTraceData rawData = RawTraceData;
+                    var rawData = RawTraceData;
                     rawData.TraceMessage = TraceMessage.ToString();
                     m_ParserQueue.Enqueue(() => ParseAndProcessCommand(rawData))
                         .ContinueWith(t => s_Logger.Error("Error parsing and processing command", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -278,7 +278,7 @@ namespace FirebirdMonitorTool.Monitor
         private void FinishProcessors()
         {
             s_Logger.Info("Finishing processors ...");
-            foreach (IProcessor processor in m_Processors)
+            foreach (var processor in m_Processors)
             {
                 s_Logger.Info(processor.GetType().FullName);
                 try
@@ -350,7 +350,7 @@ namespace FirebirdMonitorTool.Monitor
                         s_Logger.Info(@"Stopping trace ...");
 
                         // Ask firebird server to stop tracing
-                        FbTrace trace = new FbTrace
+                        var trace = new FbTrace
                         {
                             ConnectionString = m_ConnectionStringBuilder.ConnectionString
                         };

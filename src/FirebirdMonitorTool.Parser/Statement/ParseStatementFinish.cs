@@ -37,11 +37,11 @@ namespace FirebirdMonitorTool.Parser.Statement
 
         public override bool Parse()
         {
-            bool result = base.Parse();
+            var result = base.Parse();
 
             if (result)
             {
-                ParseStatement statement = new ParseStatement(Message);
+                var statement = new ParseStatement(Message);
                 result = statement.Parse(ParseStatement.Option.RECORDS_FETCHED);
                 if (result)
                 {
@@ -56,7 +56,7 @@ namespace FirebirdMonitorTool.Parser.Statement
 
             if (result)
             {
-                ParseCounters counters = new ParseCounters(Message);
+                var counters = new ParseCounters(Message);
                 result = counters.Parse();
                 if (result)
                 {
@@ -71,7 +71,7 @@ namespace FirebirdMonitorTool.Parser.Statement
 
             if (result && !string.IsNullOrWhiteSpace(Message))
             {
-                ParseTableCounts parseTableCounts = new ParseTableCounts(Message);
+                var parseTableCounts = new ParseTableCounts(Message);
                 result = parseTableCounts.Parse();
                 if (result)
                 {

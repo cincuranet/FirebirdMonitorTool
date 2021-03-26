@@ -106,7 +106,7 @@ namespace FirebirdMonitorTool.Parser.Common
                     throw new ArgumentOutOfRangeException(nameof(option));
             }
 
-            Match statementMatch = regex.Match(Message);
+            var statementMatch = regex.Match(Message);
             if (statementMatch.Success)
             {
                 Id = long.Parse(statementMatch.Groups["StatementId"].Value);
@@ -126,7 +126,7 @@ namespace FirebirdMonitorTool.Parser.Common
             // Check for a plan
 			if (statementMatch.Success)
             {
-                int index = Text.IndexOf(s_PlanSeparator, StringComparison.InvariantCulture);
+                var index = Text.IndexOf(s_PlanSeparator, StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
                     //  With Plan
@@ -136,7 +136,7 @@ namespace FirebirdMonitorTool.Parser.Common
                     if (Params.Length > 0)
                     {
                         // Re-evaluate Plan again
-                        int paramIndex = Plan.IndexOf(Params[0], StringComparison.InvariantCulture);
+                        var paramIndex = Plan.IndexOf(Params[0], StringComparison.InvariantCulture);
                         Plan = Plan.Substring(0, paramIndex).TrimEnd();
                     }
                 }
@@ -147,7 +147,7 @@ namespace FirebirdMonitorTool.Parser.Common
                     if (Params.Length > 0)
                     {
                         // Re-evaluate Text again
-                        int paramIndex = Text.IndexOf(Params[0], StringComparison.InvariantCulture);
+                        var paramIndex = Text.IndexOf(Params[0], StringComparison.InvariantCulture);
                         Text = Text.Substring(0, paramIndex).TrimEnd();
                     }
                 }

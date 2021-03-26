@@ -27,11 +27,11 @@ namespace FirebirdMonitorTool.Parser.Statement
 
         public override bool Parse()
         {
-            bool result = base.Parse();
+            var result = base.Parse();
 
             if (result)
             {
-                ParseStatement statement = new ParseStatement(Message);
+                var statement = new ParseStatement(Message);
                 result = statement.Parse(ParseStatement.Option.NONE);
                 if (result)
                 {

@@ -47,24 +47,24 @@ namespace FirebirdMonitorTool.Parser.Transaction
 
         public override bool Parse()
         {
-            bool result = base.Parse();
+            var result = base.Parse();
 
             if (result)
             {
-                Match match = s_Regex.Match(Message);
+                var match = s_Regex.Match(Message);
                 result = match.Success;
                 if (result)
                 {
                     TransactionId = long.Parse(match.Groups["TransactionId"].Value);
-                    string isolationParams = match.Groups["IsolationParams"].Value;
-                    string[] strings = isolationParams.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
+                    var isolationParams = match.Groups["IsolationParams"].Value;
+                    var strings = isolationParams.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(s => s.Trim())
                         .ToArray();
                     int index;
                     IsolationMode = strings.Length >= 1 ? strings[0] : string.Empty;
                     if (IsolationMode == "READ_COMMITTED")
                     {
-                        string recordVersion = strings.Length >= 2 ? strings[1] : string.Empty;
+                        var recordVersion = strings.Length >= 2 ? strings[1] : string.Empty;
                         switch (recordVersion)
                         {
                             case "REC_VERSION":
@@ -80,17 +80,17 @@ namespace FirebirdMonitorTool.Parser.Transaction
                     {
                         index = 1;
                     }
-                    string wait = strings.Length >= index + 1 ? strings[index++] : string.Empty;
+                    var wait = strings.Length >= index + 1 ? strings[index++] : string.Empty;
                     Wait = wait.StartsWith("WAIT");
                     if (Wait)
                     {
-                        Match waitMatch = s_WaitRegex.Match(wait);
+                        var waitMatch = s_WaitRegex.Match(wait);
                         if (waitMatch.Success)
                         {
                             WaitTime = TimeSpan.FromSeconds(long.Parse(waitMatch.Groups["Number"].Value));
                         }
                     }
-                    string readWrite = strings.Length >= index + 1 ? strings[index] : string.Empty;
+                    var readWrite = strings.Length >= index + 1 ? strings[index] : string.Empty;
                     ReadOnly = readWrite == "READ_ONLY";
                     RemoveFirstCharactersOfMessage(match.Groups[0].Length);
                 }

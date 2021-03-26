@@ -41,18 +41,18 @@ namespace FirebirdMonitorTool.Parser.Common
 
 		public bool Parse()
 		{
-			Match match = s_Regex.Match(Message);
+			var match = s_Regex.Match(Message);
 			if (match.Success)
 			{
 				ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(match.Groups["ElapsedTime"].Value));
-				Group numberGroup = match.Groups["Number"];
+				var numberGroup = match.Groups["Number"];
 				if (!string.IsNullOrWhiteSpace(numberGroup.Value))
 				{
-					Group typeGroup = match.Groups["Type"];
-					for (int i = 0; i < numberGroup.Captures.Count; i++)
+					var typeGroup = match.Groups["Type"];
+					for (var i = 0; i < numberGroup.Captures.Count; i++)
 					{
-						Capture numberCapture = numberGroup.Captures[i];
-						Capture typeCapture = typeGroup.Captures[i];
+						var numberCapture = numberGroup.Captures[i];
+						var typeCapture = typeGroup.Captures[i];
 						switch (typeCapture.Value)
 						{
 							case "read(s)":
