@@ -2,7 +2,6 @@
 {
     public interface IParser
     {
-        void SetRawTraceData(ICommand rawTraceData);
-        ICommand Parse();
+        ICommand Parse(ICommand rawCommand);
     }
 }

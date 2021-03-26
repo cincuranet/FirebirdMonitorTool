@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using FirebirdMonitorTool.Common;
 using FirebirdMonitorTool.Interfaces;
 using FirebirdMonitorTool.Parser;
 using FirebirdSql.Data.FirebirdClient;
@@ -163,10 +162,8 @@ namespace FirebirdMonitorTool.Monitor
             // Can be injected if necessary
             IParser parser = new Parser.Parser();
 
-            // Prepare instance for parsing and persisting
-            parser.SetRawTraceData(rawCommand);
             // parse on this thread
-            var command = parser.Parse();
+            var command = parser.Parse(rawCommand);
 
             // Process on another queue (this queue will always has ONE worker, so processing will be done sequentially)
             if (command != null)

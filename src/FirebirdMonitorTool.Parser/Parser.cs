@@ -10,30 +10,24 @@ namespace FirebirdMonitorTool.Parser
     public class Parser : IParser
     {
         private readonly ILogger m_Logger;
-        private ICommand m_RawCommand;
-        private ParsedCommand m_ParsedCommand;
 
         public Parser(ILogger logger = null)
         {
             m_Logger = logger;
         }
 
-        public void SetRawTraceData(ICommand command)
+        public ICommand Parse(ICommand rawCommand)
         {
-            m_RawCommand = command;
-        }
-
-        public ICommand Parse()
-        {
-            if (m_RawCommand != null)
+            ParsedCommand parsedCommand;
+            if (rawCommand != null)
             {
-                switch (m_RawCommand.Command)
+                switch (rawCommand.Command)
                 {
                     // see "TracePluginImpl::log_init" for the magic strings
                     // see "TracePluginImpl::log_finalize" for the magic strings
                     case "TRACE_INIT":
                     case "TRACE_FINI":
-                        m_ParsedCommand = null;
+                        parsedCommand = null;
                         break;
 
                     // see "TracePluginImpl::log_event_attach" for the magic strings
@@ -43,20 +37,20 @@ namespace FirebirdMonitorTool.Parser
                     case "FAILED ATTACH_DATABASE":
                     case "UNAUTHORIZED CREATE_DATABASE":
                     case "UNAUTHORIZED ATTACH_DATABASE":
-                        m_ParsedCommand = new ParseAttachmentStart(m_RawCommand);
+                        parsedCommand = new ParseAttachmentStart(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_detach" for the magic strings
                     case "DROP_DATABASE":
                     case "DETACH_DATABASE":
-                        m_ParsedCommand = new ParseAttachmentEnd(m_RawCommand);
+                        parsedCommand = new ParseAttachmentEnd(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_transaction_start" for the magic strings
                     case "START_TRANSACTION":
                     case "FAILED START_TRANSACTION":
                     case "UNAUTHORIZED START_TRANSACTION":
-                        m_ParsedCommand = new ParseTransactionStart(m_RawCommand);
+                        parsedCommand = new ParseTransactionStart(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_transaction_end" for the magic strings
@@ -72,63 +66,63 @@ namespace FirebirdMonitorTool.Parser
                     case "UNAUTHORIZED COMMIT_TRANSACTION":
                     case "UNAUTHORIZED ROLLBACK_RETAINING":
                     case "UNAUTHORIZED ROLLBACK_TRANSACTION":
-                        m_ParsedCommand = new ParseTransactionEnd(m_RawCommand);
+                        parsedCommand = new ParseTransactionEnd(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_dsql_prepare" for the magic strings
                     case "PREPARE_STATEMENT":
                     case "FAILED PREPARE_STATEMENT":
                     case "UNAUTHORIZED PREPARE_STATEMENT":
-                        m_ParsedCommand = new ParseStatementPrepare(m_RawCommand);
+                        parsedCommand = new ParseStatementPrepare(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
                     case "EXECUTE_STATEMENT_START":
                     case "FAILED EXECUTE_STATEMENT_START":
                     case "UNAUTHORIZED EXECUTE_STATEMENT_START":
-                        m_ParsedCommand = new ParseStatementStart(m_RawCommand);
+                        parsedCommand = new ParseStatementStart(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
                     case "EXECUTE_STATEMENT_FINISH":
                     case "FAILED EXECUTE_STATEMENT_FINISH":
                     case "UNAUTHORIZED EXECUTE_STATEMENT_FINISH":
-                        m_ParsedCommand = new ParseStatementFinish(m_RawCommand);
+                        parsedCommand = new ParseStatementFinish(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_dsql_free" for the magic strings
                     case "FREE_STATEMENT":
-                        m_ParsedCommand = new ParseStatementFree(m_RawCommand);
+                        parsedCommand = new ParseStatementFree(rawCommand);
                         break;
 
                     // see "TracePluginImpl::log_event_dsql_free" for the magic strings
                     case "CLOSE_CURSOR":
-                        m_ParsedCommand = new ParseStatementClose(m_RawCommand);
+                        parsedCommand = new ParseStatementClose(rawCommand);
                         break;
 
                     default:
-                        m_ParsedCommand = null;
+                        parsedCommand = null;
                         m_Logger?.LogWarning(
                             string.Format(
                                 "Unknown Command: {1}{0}Data:{0}{2}",
-                                Environment.NewLine, m_RawCommand.Command, m_RawCommand));
+                                Environment.NewLine, rawCommand.Command, rawCommand));
                         break;
                 }
 
-                if (m_ParsedCommand != null)
+                if (parsedCommand != null)
                 {
                     try
                     {
-                        if (m_ParsedCommand.Parse())
+                        if (parsedCommand.Parse())
                         {
-                            return m_ParsedCommand;
+                            return parsedCommand;
                         }
                         m_Logger?.LogWarning(
                             string.Format(
                                 "Parsing failed for command {1}:{0}Original message:{0}{2}",
                                 Environment.NewLine,
-                                m_RawCommand.Command,
-                                m_RawCommand.TraceMessage));
+                                rawCommand.Command,
+                                rawCommand.TraceMessage));
                     }
                     catch (Exception e)
                     {
@@ -137,8 +131,8 @@ namespace FirebirdMonitorTool.Parser
                             string.Format(
                                 "Parsing failed for command {1}:{0}Original message:{0}{2}",
                                 Environment.NewLine,
-                                m_RawCommand.Command,
-                                m_RawCommand.TraceMessage));
+                                rawCommand.Command,
+                                rawCommand.TraceMessage));
                     }
                 }
             }

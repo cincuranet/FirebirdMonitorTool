@@ -7,7 +7,6 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\FirebirdMonitorTool.Common\FirebirdMonitorTool.Common.csproj" />
         <ProjectReference Include="..\FirebirdMonitorTool.Interfaces\FirebirdMonitorTool.Interfaces.csproj" />
         <ProjectReference Include="..\FirebirdMonitorTool.Parser\FirebirdMonitorTool.Parser.csproj" />
     </ItemGroup>

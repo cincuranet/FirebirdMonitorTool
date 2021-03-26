@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FirebirdMonitorTool.Common
+namespace FirebirdMonitorTool.Monitor
 {
     public class ProducerConsumerQueue : IDisposable
     {
