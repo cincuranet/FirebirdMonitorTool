@@ -103,7 +103,7 @@ namespace FirebirdMonitorTool.Parser.Common
                     regex = s_RegexElapsedTime;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("option");
+                    throw new ArgumentOutOfRangeException(nameof(option));
             }
 
             Match statementMatch = regex.Match(Message);

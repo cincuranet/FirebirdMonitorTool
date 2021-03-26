@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="7.10.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\FirebirdMonitorTool.Common\FirebirdMonitorTool.Common.csproj" />
+        <ProjectReference Include="..\FirebirdMonitorTool.Interfaces\FirebirdMonitorTool.Interfaces.csproj" />
+        <ProjectReference Include="..\FirebirdMonitorTool.Parser\FirebirdMonitorTool.Parser.csproj" />
+    </ItemGroup>
+</Project>
