@@ -184,24 +184,15 @@ namespace FirebirdMonitorTool.UnitTests
             Assert.AreEqual(0, finishStatementCommand.Params.Count());
             Assert.IsNotNull(finishStatementCommand.TableCounts);
             Assert.AreEqual(3, finishStatementCommand.TableCounts.Count());
-            Assert.IsTrue(new[] { "RDB$DATABASE", "RDB$RELATION_FIELDS", "RDB$CHARACTER_SETS" }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Name)));
-            Assert.IsTrue(new long?[] { 1L, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Natural)));
-            Assert.IsTrue(new long?[] { null, 6L, 2L }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Index)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Update)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Insert)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Delete)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Backout)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Purge)));
-            Assert.IsTrue(new long?[] { null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Expunge)));
+            CollectionAssert.AreEqual(new[] { "RDB$DATABASE", "RDB$RELATION_FIELDS", "RDB$CHARACTER_SETS" }, finishStatementCommand.TableCounts.Select(tc => tc.Name));
+            CollectionAssert.AreEqual(new long?[] { 1L, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Natural));
+            CollectionAssert.AreEqual(new long?[] { null, 6L, 2L }, finishStatementCommand.TableCounts.Select(tc => tc.Index));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Update));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Insert));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Delete));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Backout));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Purge));
+            CollectionAssert.AreEqual(new long?[] { null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Expunge));
             Assert.AreEqual(8L, finishStatementCommand.RecordsFetched);
             Assert.AreEqual(6, finishStatementCommand.ElapsedTime.TotalMilliseconds);
             Assert.AreEqual(3L, finishStatementCommand.Reads);
@@ -224,7 +215,7 @@ namespace FirebirdMonitorTool.UnitTests
             Assert.AreEqual(null, finishStatementCommand.Plan);
             Assert.IsNotNull(finishStatementCommand.Params);
             Assert.AreEqual(21, finishStatementCommand.Params.Count());
-            Assert.IsTrue(
+            CollectionAssert.AreEqual(
                 new[]
                 {
                     @"param0 = integer, ""22""",
@@ -248,27 +239,19 @@ namespace FirebirdMonitorTool.UnitTests
                     @"param18 = integer, ""37056""",
                     @"param19 = smallint, ""0""",
                     @"param20 = varchar(400), ""<NULL>"""
-                }.SequenceEqual(finishStatementCommand.Params));
+                },
+                finishStatementCommand.Params);
             Assert.IsNotNull(finishStatementCommand.TableCounts);
             Assert.AreEqual(4, finishStatementCommand.TableCounts.Count());
-            Assert.IsTrue(new[] { "T_RACE_STAT", "T_WC_VERSIONS", "T_WEB_SITE", "T_RECORD" }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Name)));
-            Assert.IsTrue(new long?[] { null, null, null, 430L }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Natural)));
-            Assert.IsTrue(new long?[] { 432L, 1L, 6L, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Index)));
-            Assert.IsTrue(new long?[] { 1L, 1L, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Update)));
-            Assert.IsTrue(new long?[] { null, null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Insert)));
-            Assert.IsTrue(new long?[] { null, null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Delete)));
-            Assert.IsTrue(new long?[] { null, null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Backout)));
-            Assert.IsTrue(new long?[] { null, null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Purge)));
-            Assert.IsTrue(new long?[] { null, null, null, null }
-                              .SequenceEqual(finishStatementCommand.TableCounts.Select(tc => tc.Expunge)));
+            CollectionAssert.AreEqual(new[] { "T_RACE_STAT", "T_WC_VERSIONS", "T_WEB_SITE", "T_RECORD" }, finishStatementCommand.TableCounts.Select(tc => tc.Name));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, 430L }, finishStatementCommand.TableCounts.Select(tc => tc.Natural));
+            CollectionAssert.AreEqual(new long?[] { 432L, 1L, 6L, null }, finishStatementCommand.TableCounts.Select(tc => tc.Index));
+            CollectionAssert.AreEqual(new long?[] { 1L, 1L, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Update));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Insert));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Delete));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Backout));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Purge));
+            CollectionAssert.AreEqual(new long?[] { null, null, null, null }, finishStatementCommand.TableCounts.Select(tc => tc.Expunge));
             Assert.AreEqual(0L, finishStatementCommand.RecordsFetched);
             Assert.AreEqual(59, finishStatementCommand.ElapsedTime.TotalMilliseconds);
             Assert.AreEqual(1081L, finishStatementCommand.Reads);
