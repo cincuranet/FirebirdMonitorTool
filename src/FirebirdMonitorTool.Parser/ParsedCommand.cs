@@ -20,35 +20,12 @@ namespace FirebirdMonitorTool.Parser
 
         public abstract bool Parse();
 
-        public long SessionId
-        {
-            get { return m_RawRawCommand.SessionId; }
-        }
-
-        public DateTime TimeStamp
-        {
-            get { return m_RawRawCommand.TimeStamp; }
-        }
-
-        public int ServerProcessId
-        {
-            get { return m_RawRawCommand.ServerProcessId; }
-        }
-
-        public long InternalTraceId
-        {
-            get { return m_RawRawCommand.InternalTraceId; }
-        }
-
-        public string Command
-        {
-            get { return m_RawRawCommand.Command; }
-        }
-
-        public string TraceMessage
-        {
-            get { return m_RawRawCommand.TraceMessage; }
-        }
+        public long SessionId => m_RawRawCommand.SessionId;
+        public DateTime TimeStamp => m_RawRawCommand.TimeStamp;
+        public int ServerProcessId => m_RawRawCommand.ServerProcessId;
+        public long InternalTraceId => m_RawRawCommand.InternalTraceId;
+        public string Command => m_RawRawCommand.Command;
+        public string TraceMessage => m_RawRawCommand.TraceMessage;
 
         protected string Message
         {
