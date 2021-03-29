@@ -16,16 +16,19 @@ namespace FirebirdMonitorTool.Parser.Common
             m_Message = message;
         }
 
-        private static long? GetLongValue(string value)
+        public IReadOnlyList<TableCount> TableCounts { get; private set; }
+
+        public bool Parse()
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            var strings = m_Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (strings.Length > 2
+                && strings[0].EndsWith(s_Line1, StringComparison.InvariantCulture)
+                && strings[1].EndsWith(s_Line2, StringComparison.InvariantCulture))
             {
-                if (long.TryParse(value, out var result))
-                {
-                    return result;
-                }
+                TableCounts = GetTableCounts(strings.Skip(2)).ToList();
+                return true;
             }
-            return null;
+            return false;
         }
 
         private static IEnumerable<TableCount> GetTableCounts(IEnumerable<string> lines)
@@ -57,19 +60,16 @@ namespace FirebirdMonitorTool.Parser.Common
             }
         }
 
-        public TableCount[] TableCounts { get; private set; }
-
-        public bool Parse()
+        private static long? GetLongValue(string value)
         {
-            var strings = m_Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            if (strings.Length > 2
-                && strings[0].EndsWith(s_Line1, StringComparison.InvariantCulture)
-                && strings[1].EndsWith(s_Line2, StringComparison.InvariantCulture))
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                TableCounts = GetTableCounts(strings.Skip(2)).ToArray();
-                return true;
+                if (long.TryParse(value, out var result))
+                {
+                    return result;
+                }
             }
-            return false;
+            return null;
         }
     }
 }

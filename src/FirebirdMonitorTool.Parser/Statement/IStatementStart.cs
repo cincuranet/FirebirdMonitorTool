@@ -5,6 +5,6 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     public interface IStatementStart : IStatement, ITransaction
     {
-        IEnumerable<string> Params { get; }
+        IReadOnlyList<string> Params { get; }
     }
 }

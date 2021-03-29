@@ -44,12 +44,12 @@ namespace FirebirdMonitorTool.Parser.Transaction
                     var isolationParams = match.Groups["IsolationParams"].Value;
                     var strings = isolationParams.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
                         .Select(s => s.Trim())
-                        .ToArray();
+                        .ToList();
                     int index;
-                    IsolationMode = strings.Length >= 1 ? strings[0] : string.Empty;
+                    IsolationMode = strings.Count >= 1 ? strings[0] : string.Empty;
                     if (IsolationMode.Equals("READ_COMMITTED", StringComparison.Ordinal))
                     {
-                        var recordVersion = strings.Length >= 2 ? strings[1] : string.Empty;
+                        var recordVersion = strings.Count >= 2 ? strings[1] : string.Empty;
                         if (recordVersion.Equals("REC_VERSION", StringComparison.Ordinal))
                         {
                             RecordVersion = true;
@@ -64,7 +64,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
                     {
                         index = 1;
                     }
-                    var wait = strings.Length >= index + 1 ? strings[index++] : string.Empty;
+                    var wait = strings.Count >= index + 1 ? strings[index++] : string.Empty;
                     Wait = wait.StartsWith("WAIT", StringComparison.Ordinal);
                     if (Wait)
                     {
@@ -74,7 +74,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
                             WaitTime = TimeSpan.FromSeconds(long.Parse(waitMatch.Groups["Number"].Value));
                         }
                     }
-                    var readWrite = strings.Length >= index + 1 ? strings[index] : string.Empty;
+                    var readWrite = strings.Count >= index + 1 ? strings[index] : string.Empty;
                     ReadOnly = readWrite.Equals("READ_ONLY", StringComparison.Ordinal);
                     RemoveFirstCharactersOfMessage(match.Groups[0].Length);
                 }

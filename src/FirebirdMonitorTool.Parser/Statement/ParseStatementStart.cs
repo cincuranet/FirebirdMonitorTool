@@ -13,7 +13,7 @@ namespace FirebirdMonitorTool.Parser.Statement
         public long StatementId { get; private set; }
         public string Text { get; private set; }
         public string Plan { get; private set; }
-        public IEnumerable<string> Params { get; private set; }
+        public IReadOnlyList<string> Params { get; private set; }
 
         public override bool Parse()
         {

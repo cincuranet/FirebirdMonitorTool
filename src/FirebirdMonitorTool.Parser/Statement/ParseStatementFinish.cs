@@ -14,8 +14,8 @@ namespace FirebirdMonitorTool.Parser.Statement
         public long StatementId { get; private set; }
         public string Text { get; private set; }
         public string Plan { get; private set; }
-        public IEnumerable<string> Params { get; private set; }
-        public IEnumerable<ITableCount> TableCounts { get; private set; }
+        public IReadOnlyList<string> Params { get; private set; }
+        public IReadOnlyList<ITableCount> TableCounts { get; private set; }
         public long RecordsFetched { get; private set; }
         public TimeSpan ElapsedTime { get; private set; }
         public long? Reads { get; private set; }

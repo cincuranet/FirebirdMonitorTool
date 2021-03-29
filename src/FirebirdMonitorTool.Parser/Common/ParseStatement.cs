@@ -14,7 +14,7 @@ namespace FirebirdMonitorTool.Parser.Common
             ELAPSED_TIME
         }
 
-        private static readonly string s_PlanSeparator;
+        private static readonly string s_PlanSeparator = "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
 
         private static readonly Regex s_RegexNone =
             new Regex(
@@ -36,30 +36,11 @@ namespace FirebirdMonitorTool.Parser.Common
                 @"(param\d+\s=\s.+)$",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private readonly string m_Message;
-
-        static ParseStatement()
-        {
-            s_PlanSeparator = new string('^', 79);
-        }
+        public string Message { get; private set; }
 
         public ParseStatement(string message)
         {
-            m_Message = message;
-        }
-
-        private static IEnumerable<string> GetParams(string text)
-        {
-            return from line in text.Split(new[] { '\n', '\r' })
-                   select s_RegexParam.Match(line)
-                   into match
-                   where match.Success
-                   select match.Groups[1].Value;
-        }
-
-        public string Message
-        {
-            get { return m_Message; }
+            Message = message;
         }
 
         public long Id { get; private set; }
@@ -68,7 +49,7 @@ namespace FirebirdMonitorTool.Parser.Common
         public long? RecordsFetched { get; private set; }
         public TimeSpan? ElapsedTime { get; private set; }
         public int CharactersParsed { get; private set; }
-        public string[] Params { get; private set; }
+        public IReadOnlyList<string> Params { get; private set; }
 
         public bool Parse(Option option)
         {
@@ -105,8 +86,8 @@ namespace FirebirdMonitorTool.Parser.Common
                     //  With Plan
                     Plan = Text.Substring(index + s_PlanSeparator.Length, Text.Length - (index + s_PlanSeparator.Length)).Trim();
                     Text = Text.Substring(0, index).TrimEnd();
-                    Params = GetParams(Plan).ToArray();
-                    if (Params.Length > 0)
+                    Params = GetParams(Plan).ToList();
+                    if (Params.Count > 0)
                     {
                         // Re-evaluate Plan again
                         var paramIndex = Plan.IndexOf(Params[0], StringComparison.InvariantCulture);
@@ -116,8 +97,8 @@ namespace FirebirdMonitorTool.Parser.Common
                 else
                 {
                     // No plan
-                    Params = GetParams(Text).ToArray();
-                    if (Params.Length > 0)
+                    Params = GetParams(Text).ToList();
+                    if (Params.Count > 0)
                     {
                         // Re-evaluate Text again
                         var paramIndex = Text.IndexOf(Params[0], StringComparison.InvariantCulture);
@@ -127,6 +108,15 @@ namespace FirebirdMonitorTool.Parser.Common
             }
 
             return statementMatch.Success;
+        }
+
+        private static IEnumerable<string> GetParams(string text)
+        {
+            return from line in text.Split(new[] { '\n', '\r' })
+                   select s_RegexParam.Match(line)
+                   into match
+                   where match.Success
+                   select match.Groups[1].Value;
         }
     }
 }

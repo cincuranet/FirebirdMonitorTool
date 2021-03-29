@@ -32,41 +32,47 @@ namespace FirebirdMonitorTool.Parser.Attachment
 
         public override bool Parse()
         {
+            return ParseRegular() || ParseInternal() || false;
+        }
+
+        private bool ParseRegular()
+        {
+            var match = s_RegexRegular.Match(Message);
+            var result = match.Success;
+            if (result)
             {
-                var match = s_RegexRegular.Match(Message);
-                var result = match.Success;
-                if (result)
-                {
-                    DatabaseName = match.Groups["DatabaseName"].Value;
-                    ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
-                    User = match.Groups["User"].Value;
-                    Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
-                    CharacterSet = match.Groups["Charset"].Value;
-                    RemoteProtocol = match.Groups["RemoteProtocol"].Value;
-                    RemoteAddress = match.Groups["RemoteAddress"].Value;
-                    RemoteProcessName = match.Groups["RemoteProcessName"].Value;
-                    RemoteProcessId = long.Parse(match.Groups["RemoteProcessId"].Value);
-                    RemoveFirstCharactersOfMessage(match.Groups[0].Length);
-                    return true;
-                }
+                DatabaseName = match.Groups["DatabaseName"].Value;
+                ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
+                User = match.Groups["User"].Value;
+                Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
+                CharacterSet = match.Groups["Charset"].Value;
+                RemoteProtocol = match.Groups["RemoteProtocol"].Value;
+                RemoteAddress = match.Groups["RemoteAddress"].Value;
+                RemoteProcessName = match.Groups["RemoteProcessName"].Value;
+                RemoteProcessId = long.Parse(match.Groups["RemoteProcessId"].Value);
+                RemoveFirstCharactersOfMessage(match.Groups[0].Length);
+                return true;
             }
+            return false;
+        }
+
+        private bool ParseInternal()
+        {
+            var match = s_RegexInternal.Match(Message);
+            var result = match.Success;
+            if (result)
             {
-                var match = s_RegexInternal.Match(Message);
-                var result = match.Success;
-                if (result)
-                {
-                    DatabaseName = match.Groups["DatabaseName"].Value;
-                    ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
-                    User = match.Groups["User"].Value;
-                    Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
-                    CharacterSet = match.Groups["Charset"].Value;
-                    RemoteProtocol = "internal";
-                    RemoteAddress = default;
-                    RemoteProcessName = default;
-                    RemoteProcessId = default;
-                    RemoveFirstCharactersOfMessage(match.Groups[0].Length);
-                    return true;
-                }
+                DatabaseName = match.Groups["DatabaseName"].Value;
+                ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
+                User = match.Groups["User"].Value;
+                Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
+                CharacterSet = match.Groups["Charset"].Value;
+                RemoteProtocol = "internal";
+                RemoteAddress = default;
+                RemoteProcessName = default;
+                RemoteProcessId = default;
+                RemoveFirstCharactersOfMessage(match.Groups[0].Length);
+                return true;
             }
             return false;
         }

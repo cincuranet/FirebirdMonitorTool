@@ -16,7 +16,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
         public long? Writes { get; private set; }
         public long? Fetches { get; private set; }
         public long? Marks { get; private set; }
-        public IEnumerable<ITableCount> TableCounts { get; private set; }
+        public IReadOnlyList<ITableCount> TableCounts { get; private set; }
 
         public override bool Parse()
         {

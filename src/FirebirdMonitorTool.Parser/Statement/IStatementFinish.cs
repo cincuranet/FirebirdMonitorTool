@@ -7,8 +7,8 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     public interface IStatementFinish : IStatement, ITransaction
     {
-        IEnumerable<string> Params { get; }
-        IEnumerable<ITableCount> TableCounts { get; }
+        IReadOnlyList<string> Params { get; }
+        IReadOnlyList<ITableCount> TableCounts { get; }
         long RecordsFetched { get; }
         TimeSpan ElapsedTime { get; }
         long? Reads { get; }

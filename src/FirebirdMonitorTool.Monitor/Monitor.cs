@@ -29,15 +29,15 @@ namespace FirebirdMonitorTool.Monitor
             m_RawCommand = null;
         }
 
-        public void Process(string output)
+        public void Process(string input)
         {
-            if (string.IsNullOrWhiteSpace(output))
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return;
             }
             lock (m_Locker)
             {
-                var match = s_StartOfTrace.Match(output);
+                var match = s_StartOfTrace.Match(input);
                 if (match.Success)
                 {
                     if (m_RawCommand != null)
@@ -59,7 +59,7 @@ namespace FirebirdMonitorTool.Monitor
                 }
                 else if (m_RawCommand != null)
                 {
-                    m_TraceMessage.Append(output);
+                    m_TraceMessage.Append(input);
                 }
             }
         }

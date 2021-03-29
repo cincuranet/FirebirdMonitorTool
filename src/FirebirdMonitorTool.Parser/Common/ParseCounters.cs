@@ -10,16 +10,11 @@ namespace FirebirdMonitorTool.Parser.Common
                 @"^\s*(?<ElapsedTime>\d+)\sms(\,\s*(?<Number>\d+)\s(?<Type>read\(s\)|write\(s\)|fetch\(es\)|mark\(s\)))*",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
-        private readonly string m_Message;
+        public string Message { get; private set; }
 
         public ParseCounters(string message)
         {
-            m_Message = message;
-        }
-
-        public string Message
-        {
-            get { return m_Message; }
+            Message = message;
         }
 
         public TimeSpan ElapsedTime { get; private set; }
