@@ -1,6 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>FirebirdMonitorTool.Parser</PackageId>
+        <PackageVersion>$(Version)</PackageVersion>
+        <Authors>Jiří Činčura, Danny Van den Wouwer</Authors>
+        <PackageProjectUrl>https://github.com/cincuranet/FirebirdMonitorTool</PackageProjectUrl>
+        <Description>https://github.com/cincuranet/FirebirdMonitorTool</Description>
+        <PackageTags>firebird, trace, audit</PackageTags>
     </PropertyGroup>
     <ItemGroup>
     </ItemGroup>

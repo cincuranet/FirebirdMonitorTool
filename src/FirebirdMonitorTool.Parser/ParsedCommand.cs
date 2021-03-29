@@ -8,14 +8,13 @@ namespace FirebirdMonitorTool.Parser
     {
         private readonly ICommand m_RawCommand;
 
-        private StringBuilder m_WorkingMessage;
-        private bool m_MessageCached;
-        private string m_MessageCache;
+        private readonly StringBuilder m_WorkingMessage;
 
         protected ParsedCommand(ICommand rawCommand)
         {
             m_RawCommand = rawCommand;
             m_WorkingMessage = new StringBuilder(m_RawCommand.TraceMessage);
+            SetMessage();
         }
 
         public abstract bool Parse();
@@ -26,18 +25,7 @@ namespace FirebirdMonitorTool.Parser
         public string Command => m_RawCommand.Command;
         public string TraceMessage => m_RawCommand.TraceMessage;
 
-        protected string Message
-        {
-            get
-            {
-                if (!m_MessageCached)
-                {
-                    m_MessageCache = m_WorkingMessage.ToString();
-                    m_MessageCached = true;
-                }
-                return m_MessageCache;
-            }
-        }
+        protected string Message { get; private set; }
 
         protected void RemoveFirstCharactersOfMessage(int length)
         {
@@ -45,8 +33,13 @@ namespace FirebirdMonitorTool.Parser
             if (length > 0)
             {
                 m_WorkingMessage.Remove(0, length);
-                m_MessageCached = false;
+                SetMessage();
             }
+        }
+
+        private void SetMessage()
+        {
+            Message = m_WorkingMessage.ToString();
         }
     }
 }
