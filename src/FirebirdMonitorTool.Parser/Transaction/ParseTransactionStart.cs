@@ -1,5 +1,4 @@
-﻿using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Interfaces.Transaction;
+﻿using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {

@@ -1,16 +1,19 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Interfaces.Attachment;
+﻿using System.Text.RegularExpressions;
+using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Attachment
 {
     public abstract class ParseAttachment : ParsedCommand, IAttachment
     {
-        private static readonly Regex s_Regex =
+        private static readonly Regex s_RegexRegular =
             new Regex(
-                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+):(?<Role>.+),\s(?<Charset>.+),\s(?<RemoteProtocol>.+):(?<RemoteAddress>.+)\)\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+)\s+(?=\(TRA_|Statement|\s*)",
-                RegexOptions.Compiled);
+                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s(?<RemoteProtocol>.+):(?<RemoteAddress>.+)\)\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+)\s+(?=\(TRA_|Statement|\s*)",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        private static readonly Regex s_RegexInternal =
+            new Regex(
+                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s<internal>\)\s+(?=\(TRA_|Statement|\s*)",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         protected ParseAttachment(ICommand rawCommand)
             : base(rawCommand)
@@ -29,22 +32,43 @@ namespace FirebirdMonitorTool.Parser.Attachment
 
         public override bool Parse()
         {
-            var match = s_Regex.Match(Message);
-            var result = match.Success;
-            if (result)
             {
-                DatabaseName = match.Groups["DatabaseName"].Value;
-                ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
-                User = match.Groups["User"].Value;
-                Role = match.Groups["Role"].Value;
-                CharacterSet = match.Groups["Charset"].Value;
-                RemoteProtocol = match.Groups["RemoteProtocol"].Value;
-                RemoteAddress = match.Groups["RemoteAddress"].Value;
-                RemoteProcessName = match.Groups["RemoteProcessName"].Value;
-                RemoteProcessId = long.Parse(match.Groups["RemoteProcessId"].Value);
-                RemoveFirstCharactersOfMessage(match.Groups[0].Length);
+                var match = s_RegexRegular.Match(Message);
+                var result = match.Success;
+                if (result)
+                {
+                    DatabaseName = match.Groups["DatabaseName"].Value;
+                    ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
+                    User = match.Groups["User"].Value;
+                    Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
+                    CharacterSet = match.Groups["Charset"].Value;
+                    RemoteProtocol = match.Groups["RemoteProtocol"].Value;
+                    RemoteAddress = match.Groups["RemoteAddress"].Value;
+                    RemoteProcessName = match.Groups["RemoteProcessName"].Value;
+                    RemoteProcessId = long.Parse(match.Groups["RemoteProcessId"].Value);
+                    RemoveFirstCharactersOfMessage(match.Groups[0].Length);
+                    return true;
+                }
             }
-            return result;
+            {
+                var match = s_RegexInternal.Match(Message);
+                var result = match.Success;
+                if (result)
+                {
+                    DatabaseName = match.Groups["DatabaseName"].Value;
+                    ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
+                    User = match.Groups["User"].Value;
+                    Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
+                    CharacterSet = match.Groups["Charset"].Value;
+                    RemoteProtocol = "internal";
+                    RemoteAddress = default;
+                    RemoteProcessName = default;
+                    RemoteProcessId = default;
+                    RemoveFirstCharactersOfMessage(match.Groups[0].Length);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

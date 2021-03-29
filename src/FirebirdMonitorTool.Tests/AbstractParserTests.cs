@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using FirebirdMonitorTool.Interfaces;
+using FirebirdMonitorTool.Parser.Common;
 
-namespace FirebirdMonitorTool.UnitTests
+namespace FirebirdMonitorTool.Tests
 {
     public abstract class AbstractParserTests
     {

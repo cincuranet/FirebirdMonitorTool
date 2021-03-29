@@ -1,5 +1,5 @@
-﻿using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Parser.Attachment;
+﻿using FirebirdMonitorTool.Parser.Attachment;
+using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Statement
 {

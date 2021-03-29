@@ -18,23 +18,23 @@ namespace FirebirdMonitorTool.Parser.Common
 
         private static readonly Regex s_RegexNone =
             new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)",
-                RegexOptions.Compiled | RegexOptions.Multiline);
+                @"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
         private static readonly Regex s_RegexRecordsFetched =
             new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s?(?<Number>\d+)\srecords fetched",
-                RegexOptions.Compiled | RegexOptions.Multiline);
+                @"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s?(?<Number>\d+)\srecords fetched",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
         private static readonly Regex s_RegexElapsedTime =
             new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s?\s{6}(?<Number>\d+)\sms",
-                RegexOptions.Compiled | RegexOptions.Multiline);
+                @"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s*(?<Number>\d+)\sms",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
         private static readonly Regex s_RegexParam =
             new Regex(
                 @"(param\d+\s=\s.+)$",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly string m_Message;
 
@@ -72,22 +72,13 @@ namespace FirebirdMonitorTool.Parser.Common
 
         public bool Parse(Option option)
         {
-            Regex regex;
-            switch (option)
+            var regex = option switch
             {
-                case Option.NONE:
-                    regex = s_RegexNone;
-                    break;
-                case Option.RECORDS_FETCHED:
-                    regex = s_RegexRecordsFetched;
-                    break;
-                case Option.ELAPSED_TIME:
-                    regex = s_RegexElapsedTime;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(option));
-            }
-
+                Option.NONE => s_RegexNone,
+                Option.RECORDS_FETCHED => s_RegexRecordsFetched,
+                Option.ELAPSED_TIME => s_RegexElapsedTime,
+                _ => throw new ArgumentOutOfRangeException(nameof(option)),
+            };
             var statementMatch = regex.Match(Message);
             if (statementMatch.Success)
             {
@@ -99,14 +90,14 @@ namespace FirebirdMonitorTool.Parser.Common
                         RecordsFetched = long.Parse(statementMatch.Groups["Number"].Value);
                         break;
                     case Option.ELAPSED_TIME:
-						ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(statementMatch.Groups["Number"].Value));
+                        ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(statementMatch.Groups["Number"].Value));
                         break;
                 }
                 CharactersParsed += statementMatch.Groups[0].Length;
             }
 
             // Check for a plan
-			if (statementMatch.Success)
+            if (statementMatch.Success)
             {
                 var index = Text.IndexOf(s_PlanSeparator, StringComparison.InvariantCulture);
                 if (index >= 0)
@@ -135,7 +126,7 @@ namespace FirebirdMonitorTool.Parser.Common
                 }
             }
 
-			return statementMatch.Success;
+            return statementMatch.Success;
         }
     }
 }

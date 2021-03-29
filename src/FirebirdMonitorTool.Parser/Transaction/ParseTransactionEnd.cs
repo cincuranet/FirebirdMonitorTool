@@ -1,6 +1,5 @@
 ﻿using System;
-using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Interfaces.Transaction;
+using System.Collections.Generic;
 using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
@@ -17,6 +16,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
         public long? Writes { get; private set; }
         public long? Fetches { get; private set; }
         public long? Marks { get; private set; }
+        public IEnumerable<ITableCount> TableCounts { get; private set; }
 
         public override bool Parse()
         {
@@ -34,7 +34,16 @@ namespace FirebirdMonitorTool.Parser.Transaction
                     Fetches = counters.Fetches;
                     Marks = counters.Marks;
                     RemoveFirstCharactersOfMessage(counters.CharactersParsed);
-                    result = string.IsNullOrWhiteSpace(Message);
+                }
+            }
+
+            if (result && !string.IsNullOrWhiteSpace(Message))
+            {
+                var parseTableCounts = new ParseTableCounts(Message);
+                result = parseTableCounts.Parse();
+                if (result)
+                {
+                    TableCounts = parseTableCounts.TableCounts;
                 }
             }
 

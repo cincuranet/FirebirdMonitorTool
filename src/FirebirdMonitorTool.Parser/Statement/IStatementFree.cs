@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Interfaces.Statement
+﻿namespace FirebirdMonitorTool.Parser.Statement
 {
     public interface IStatementFree : IStatement
     {

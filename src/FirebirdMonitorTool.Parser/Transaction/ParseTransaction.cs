@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Interfaces.Transaction;
 using FirebirdMonitorTool.Parser.Attachment;
+using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {
@@ -12,12 +11,12 @@ namespace FirebirdMonitorTool.Parser.Transaction
         private static readonly Regex s_Regex =
             new Regex(
                 @"^\s*\(TRA_(?<TransactionId>\d+),\s(?<IsolationParams>[\w,\d,\|, ]+)\)",
-                RegexOptions.Compiled | RegexOptions.Multiline);
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
         private static readonly Regex s_WaitRegex =
             new Regex(
                 @"^\s*WAIT\s(?<Number>\d+)",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         protected ParseTransaction(ICommand rawCommand)
             : base(rawCommand)
@@ -48,17 +47,16 @@ namespace FirebirdMonitorTool.Parser.Transaction
                         .ToArray();
                     int index;
                     IsolationMode = strings.Length >= 1 ? strings[0] : string.Empty;
-                    if (IsolationMode == "READ_COMMITTED")
+                    if (IsolationMode.Equals("READ_COMMITTED", StringComparison.Ordinal))
                     {
                         var recordVersion = strings.Length >= 2 ? strings[1] : string.Empty;
-                        switch (recordVersion)
+                        if (recordVersion.Equals("REC_VERSION", StringComparison.Ordinal))
                         {
-                            case "REC_VERSION":
-                                RecordVersion = true;
-                                break;
-                            case "NO_REC_VERSION":
-                                RecordVersion = false;
-                                break;
+                            RecordVersion = true;
+                        }
+                        else if (recordVersion.Equals("NO_REC_VERSION", StringComparison.Ordinal))
+                        {
+                            RecordVersion = false;
                         }
                         index = 2;
                     }
@@ -67,7 +65,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
                         index = 1;
                     }
                     var wait = strings.Length >= index + 1 ? strings[index++] : string.Empty;
-                    Wait = wait.StartsWith("WAIT");
+                    Wait = wait.StartsWith("WAIT", StringComparison.Ordinal);
                     if (Wait)
                     {
                         var waitMatch = s_WaitRegex.Match(wait);
@@ -77,7 +75,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
                         }
                     }
                     var readWrite = strings.Length >= index + 1 ? strings[index] : string.Empty;
-                    ReadOnly = readWrite == "READ_ONLY";
+                    ReadOnly = readWrite.Equals("READ_ONLY", StringComparison.Ordinal);
                     RemoveFirstCharactersOfMessage(match.Groups[0].Length);
                 }
             }

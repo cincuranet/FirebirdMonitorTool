@@ -1,4 +1,4 @@
-﻿using FirebirdMonitorTool.Interfaces;
+﻿using FirebirdMonitorTool.Parser.Common;
 using FirebirdMonitorTool.Parser.Transaction;
 
 namespace FirebirdMonitorTool.Parser.Statement

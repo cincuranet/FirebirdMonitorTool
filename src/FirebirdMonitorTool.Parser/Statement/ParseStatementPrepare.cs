@@ -1,6 +1,4 @@
 ﻿using System;
-using FirebirdMonitorTool.Interfaces;
-using FirebirdMonitorTool.Interfaces.Statement;
 using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Statement

@@ -1,6 +1,6 @@
-﻿using FirebirdMonitorTool.Interfaces.Attachment;
+﻿using FirebirdMonitorTool.Parser.Attachment;
 
-namespace FirebirdMonitorTool.Interfaces.Statement
+namespace FirebirdMonitorTool.Parser.Statement
 {
     public interface IStatement : IAttachment
     {

@@ -1,142 +1,157 @@
 using System;
-using FirebirdMonitorTool.Interfaces;
 using FirebirdMonitorTool.Parser.Attachment;
+using FirebirdMonitorTool.Parser.Common;
 using FirebirdMonitorTool.Parser.Statement;
 using FirebirdMonitorTool.Parser.Transaction;
-using Microsoft.Extensions.Logging;
 
 namespace FirebirdMonitorTool.Parser
 {
-    public class Parser : IParser
+    public class Parser
     {
-        private readonly ILogger m_Logger;
-
-        public Parser(ILogger logger = null)
+        public Parser()
         {
-            m_Logger = logger;
         }
 
         public ICommand Parse(ICommand rawCommand)
         {
-            ParsedCommand parsedCommand;
-            if (rawCommand != null)
+            if (IsCommand(rawCommand, "TRACE_INIT")
+                || IsCommand(rawCommand, "TRACE_FINI"))
             {
-                switch (rawCommand.Command)
-                {
-                    // see "TracePluginImpl::log_init" for the magic strings
-                    // see "TracePluginImpl::log_finalize" for the magic strings
-                    case "TRACE_INIT":
-                    case "TRACE_FINI":
-                        parsedCommand = null;
-                        break;
-
-                    // see "TracePluginImpl::log_event_attach" for the magic strings
-                    case "CREATE_DATABASE":
-                    case "ATTACH_DATABASE":
-                    case "FAILED CREATE_DATABASE":
-                    case "FAILED ATTACH_DATABASE":
-                    case "UNAUTHORIZED CREATE_DATABASE":
-                    case "UNAUTHORIZED ATTACH_DATABASE":
-                        parsedCommand = new ParseAttachmentStart(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_detach" for the magic strings
-                    case "DROP_DATABASE":
-                    case "DETACH_DATABASE":
-                        parsedCommand = new ParseAttachmentEnd(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_transaction_start" for the magic strings
-                    case "START_TRANSACTION":
-                    case "FAILED START_TRANSACTION":
-                    case "UNAUTHORIZED START_TRANSACTION":
-                        parsedCommand = new ParseTransactionStart(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_transaction_end" for the magic strings
-                    case "COMMIT_RETAINING":
-                    case "COMMIT_TRANSACTION":
-                    case "ROLLBACK_RETAINING":
-                    case "ROLLBACK_TRANSACTION":
-                    case "FAILED COMMIT_RETAINING":
-                    case "FAILED COMMIT_TRANSACTION":
-                    case "FAILED ROLLBACK_RETAINING":
-                    case "FAILED ROLLBACK_TRANSACTION":
-                    case "UNAUTHORIZED COMMIT_RETAINING":
-                    case "UNAUTHORIZED COMMIT_TRANSACTION":
-                    case "UNAUTHORIZED ROLLBACK_RETAINING":
-                    case "UNAUTHORIZED ROLLBACK_TRANSACTION":
-                        parsedCommand = new ParseTransactionEnd(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_dsql_prepare" for the magic strings
-                    case "PREPARE_STATEMENT":
-                    case "FAILED PREPARE_STATEMENT":
-                    case "UNAUTHORIZED PREPARE_STATEMENT":
-                        parsedCommand = new ParseStatementPrepare(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
-                    case "EXECUTE_STATEMENT_START":
-                    case "FAILED EXECUTE_STATEMENT_START":
-                    case "UNAUTHORIZED EXECUTE_STATEMENT_START":
-                        parsedCommand = new ParseStatementStart(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
-                    case "EXECUTE_STATEMENT_FINISH":
-                    case "FAILED EXECUTE_STATEMENT_FINISH":
-                    case "UNAUTHORIZED EXECUTE_STATEMENT_FINISH":
-                        parsedCommand = new ParseStatementFinish(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_dsql_free" for the magic strings
-                    case "FREE_STATEMENT":
-                        parsedCommand = new ParseStatementFree(rawCommand);
-                        break;
-
-                    // see "TracePluginImpl::log_event_dsql_free" for the magic strings
-                    case "CLOSE_CURSOR":
-                        parsedCommand = new ParseStatementClose(rawCommand);
-                        break;
-
-                    default:
-                        parsedCommand = null;
-                        m_Logger?.LogWarning(
-                            string.Format(
-                                "Unknown Command: {1}{0}Data:{0}{2}",
-                                Environment.NewLine, rawCommand.Command, rawCommand));
-                        break;
-                }
-
-                if (parsedCommand != null)
-                {
-                    try
-                    {
-                        if (parsedCommand.Parse())
-                        {
-                            return parsedCommand;
-                        }
-                        m_Logger?.LogWarning(
-                            string.Format(
-                                "Parsing failed for command {1}:{0}Original message:{0}{2}",
-                                Environment.NewLine,
-                                rawCommand.Command,
-                                rawCommand.TraceMessage));
-                    }
-                    catch (Exception e)
-                    {
-                        m_Logger?.LogError(
-                            e,
-                            string.Format(
-                                "Parsing failed for command {1}:{0}Original message:{0}{2}",
-                                Environment.NewLine,
-                                rawCommand.Command,
-                                rawCommand.TraceMessage));
-                    }
-                }
+                // see "TracePluginImpl::log_init" for the magic strings
+                // see "TracePluginImpl::log_finalize" for the magic strings
+                return null;
             }
-            return null;
+            else if (IsCommand(rawCommand, "CREATE_DATABASE")
+                || IsCommand(rawCommand, "ATTACH_DATABASE")
+                || IsCommand(rawCommand, "FAILED CREATE_DATABASE")
+                || IsCommand(rawCommand, "FAILED ATTACH_DATABASE")
+                || IsCommand(rawCommand, "UNAUTHORIZED CREATE_DATABASE")
+                || IsCommand(rawCommand, "UNAUTHORIZED ATTACH_DATABASE"))
+            {
+                // see "TracePluginImpl::log_event_attach" for the magic strings
+                return HandleParsing(new ParseAttachmentStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "DROP_DATABASE")
+                || IsCommand(rawCommand, "DETACH_DATABASE"))
+            {
+                // see "TracePluginImpl::log_event_detach" for the magic strings
+                return HandleParsing(new ParseAttachmentEnd(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "START_TRANSACTION")
+                || IsCommand(rawCommand, "FAILED START_TRANSACTION")
+                || IsCommand(rawCommand, "UNAUTHORIZED START_TRANSACTION"))
+            {
+                // see "TracePluginImpl::log_event_transaction_start" for the magic strings
+                return HandleParsing(new ParseTransactionStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "COMMIT_RETAINING")
+                || IsCommand(rawCommand, "COMMIT_TRANSACTION")
+                || IsCommand(rawCommand, "ROLLBACK_RETAINING")
+                || IsCommand(rawCommand, "ROLLBACK_TRANSACTION")
+                || IsCommand(rawCommand, "FAILED COMMIT_RETAINING")
+                || IsCommand(rawCommand, "FAILED COMMIT_TRANSACTION")
+                || IsCommand(rawCommand, "FAILED ROLLBACK_RETAINING")
+                || IsCommand(rawCommand, "FAILED ROLLBACK_TRANSACTION")
+                || IsCommand(rawCommand, "UNAUTHORIZED COMMIT_RETAINING")
+                || IsCommand(rawCommand, "UNAUTHORIZED COMMIT_TRANSACTION")
+                || IsCommand(rawCommand, "UNAUTHORIZED ROLLBACK_RETAINING")
+                || IsCommand(rawCommand, "UNAUTHORIZED ROLLBACK_TRANSACTION"))
+            {
+                // see "TracePluginImpl::log_event_transaction_end" for the magic strings
+                return HandleParsing(new ParseTransactionEnd(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "PREPARE_STATEMENT")
+                || IsCommand(rawCommand, "FAILED PREPARE_STATEMENT")
+                || IsCommand(rawCommand, "UNAUTHORIZED PREPARE_STATEMENT"))
+            {
+                // see "TracePluginImpl::log_event_dsql_prepare" for the magic strings
+                return HandleParsing(new ParseStatementPrepare(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_STATEMENT_START")
+                || IsCommand(rawCommand, "FAILED EXECUTE_STATEMENT_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_STATEMENT_START"))
+            {
+                // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
+                return HandleParsing(new ParseStatementStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_STATEMENT_FINISH")
+                || IsCommand(rawCommand, "FAILED EXECUTE_STATEMENT_FINISH")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_STATEMENT_FINISH"))
+            {
+                // see "TracePluginImpl::log_event_dsql_execute" for the magic strings
+                return HandleParsing(new ParseStatementFinish(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "FREE_STATEMENT"))
+            {
+                // see "TracePluginImpl::log_event_dsql_free" for the magic strings
+                return HandleParsing(new ParseStatementFree(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "CLOSE_CURSOR"))
+            {
+                // see "TracePluginImpl::log_event_dsql_free" for the magic strings
+                return HandleParsing(new ParseStatementClose(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_TRIGGER_START")
+                || IsCommand(rawCommand, "EXECUTE_TRIGGER_FINISH")
+                || IsCommand(rawCommand, "FAILED EXECUTE_TRIGGER_START")
+                || IsCommand(rawCommand, "FAILED EXECUTE_TRIGGER_FINISH")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_TRIGGER_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_TRIGGER_FINISH"))
+            {
+                // see "TracePluginImpl::log_event_trigger_execute" for magic strings
+                return null;
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_PROCEDURE_START")
+                || IsCommand(rawCommand, "EXECUTE_PROCEDURE_FINISH")
+                || IsCommand(rawCommand, "FAILED EXECUTE_PROCEDURE_START")
+                || IsCommand(rawCommand, "FAILED EXECUTE_PROCEDURE_FINISH")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_FINISH"))
+            {
+                // see "TracePluginImpl::log_event_proc_execute" for magic strings
+                return null;
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_FUNCTION_START")
+                || IsCommand(rawCommand, "EXECUTE_FUNCTION_FINISH")
+                || IsCommand(rawCommand, "FAILED EXECUTE_FUNCTION_START")
+                || IsCommand(rawCommand, "FAILED EXECUTE_FUNCTION_FINISH")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_FUNCTION_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_FUNCTION_FINISH"))
+            {
+                // see "TracePluginImpl::log_event_func_execute" for magic strings
+                return null;
+            }
+            else if (IsCommand(rawCommand, "SET_CONTEXT"))
+            {
+                // see "TracePluginImpl::log_event_set_context" for magic strings
+                return null;
+            }
+            else if (IsCommand(rawCommand, "ERROR AT"))
+            {
+                // see "TracePluginImpl::log_event_error" for magic strings
+                return null;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown command '{rawCommand.Command}'.");
+            }
+        }
+
+        private static ICommand HandleParsing(ParsedCommand parsedCommand)
+        {
+            if (parsedCommand.Parse())
+            {
+                return parsedCommand;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unable to parse command '{parsedCommand.Command}'.");
+            }
+        }
+
+        private static bool IsCommand(ICommand rawCommand, string command)
+        {
+            return rawCommand.Command.StartsWith(command, StringComparison.Ordinal);
         }
     }
 }

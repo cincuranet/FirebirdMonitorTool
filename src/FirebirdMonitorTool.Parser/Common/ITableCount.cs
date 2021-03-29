@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Interfaces
+﻿namespace FirebirdMonitorTool.Parser.Common
 {
     public interface ITableCount
     {

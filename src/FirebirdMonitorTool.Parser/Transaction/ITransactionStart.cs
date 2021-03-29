@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Interfaces.Transaction
+﻿namespace FirebirdMonitorTool.Parser.Transaction
 {
     public interface ITransactionStart : ITransaction
     {

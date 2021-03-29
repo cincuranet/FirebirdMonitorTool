@@ -1,7 +1,7 @@
 ﻿using System;
-using FirebirdMonitorTool.Interfaces.Transaction;
+using FirebirdMonitorTool.Parser.Transaction;
 
-namespace FirebirdMonitorTool.Interfaces.Statement
+namespace FirebirdMonitorTool.Parser.Statement
 {
     public interface IStatementPrepare : IStatement, ITransaction
     {

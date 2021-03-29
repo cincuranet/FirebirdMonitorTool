@@ -1,8 +1,6 @@
-﻿using FirebirdMonitorTool.Interfaces;
-
-namespace FirebirdMonitorTool.Parser.Common
+﻿namespace FirebirdMonitorTool.Parser.Common
 {
-    public class TableCount : ITableCount
+    public sealed class TableCount : ITableCount
     {
         private readonly string m_Name;
         private readonly long? m_Natural;

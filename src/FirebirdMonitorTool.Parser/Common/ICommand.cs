@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace FirebirdMonitorTool.Interfaces
+namespace FirebirdMonitorTool.Parser.Common
 {
     public interface ICommand
     {
-        long SessionId { get; }
         DateTime TimeStamp { get; }
         int ServerProcessId { get; }
         long InternalTraceId { get; }
