@@ -18,11 +18,6 @@ namespace FirebirdMonitorTool.Tests
                 m_Message = message;
             }
 
-            public long SessionId
-            {
-                get { return 1L; }
-            }
-
             public DateTime TimeStamp
             {
                 get { return DateTime.Now; }
