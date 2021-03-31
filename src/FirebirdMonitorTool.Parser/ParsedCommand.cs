@@ -27,12 +27,12 @@ namespace FirebirdMonitorTool.Parser
 
         protected string Message { get; private set; }
 
-        protected void RemoveFirstCharactersOfMessage(int length)
+        protected void RemoveFirstCharactersOfMessage(int count)
         {
-            length = Math.Min(length, Message.Length);
-            if (length > 0)
+            count = Math.Min(count, Message.Length);
+            if (count > 0)
             {
-                m_WorkingMessage.Remove(0, length);
+                m_WorkingMessage.Remove(0, count);
                 SetMessage();
             }
         }
