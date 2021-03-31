@@ -16,6 +16,7 @@ namespace FirebirdMonitorTool.Tests
             {
                 m.Process(line + Environment.NewLine);
             }
+            m.Flush();
         }
     }
 }

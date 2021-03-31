@@ -38,15 +38,7 @@ namespace FirebirdMonitorTool
                 var match = s_StartOfTrace.Match(input);
                 if (match.Success)
                 {
-                    if (m_RawCommand != null)
-                    {
-                        var rawTraceData = m_RawCommand;
-                        rawTraceData.TraceMessage = m_TraceMessage.ToString();
-                        m_TraceMessage.Clear();
-
-                        var parsedCommand = m_Parser.Parse(rawTraceData);
-                        OnCommand?.Invoke(this, parsedCommand);
-                    }
+                    FlushImpl();
                     var timeStamp = DateTime.ParseExact(match.Groups["TimeStamp"].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
                     var serverProcessId = int.Parse(match.Groups["ServerProcessId"].Value);
                     var internalTraceId = long.Parse(match.Groups["InternalTraceId"].Value, NumberStyles.HexNumber);
@@ -57,6 +49,27 @@ namespace FirebirdMonitorTool
                 {
                     m_TraceMessage.Append(input);
                 }
+            }
+        }
+
+        public void Flush()
+        {
+            lock (m_Locker)
+            {
+                FlushImpl();
+            }
+        }
+
+        private void FlushImpl()
+        {
+            if (m_RawCommand != null)
+            {
+                var rawTraceData = m_RawCommand;
+                rawTraceData.TraceMessage = m_TraceMessage.ToString();
+                m_TraceMessage.Clear();
+
+                var parsedCommand = m_Parser.Parse(rawTraceData);
+                OnCommand?.Invoke(this, parsedCommand);
             }
         }
     }
