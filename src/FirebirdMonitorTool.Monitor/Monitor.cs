@@ -44,12 +44,10 @@ namespace FirebirdMonitorTool.Monitor
                     {
                         var rawTraceData = m_RawCommand;
                         rawTraceData.TraceMessage = m_TraceMessage.ToString();
+                        m_TraceMessage.Clear();
 
                         var parsedCommand = m_Parser.Parse(rawTraceData);
                         OnCommand?.Invoke(this, parsedCommand);
-
-                        m_RawCommand = null;
-                        m_TraceMessage.Clear();
                     }
                     var timeStamp = DateTime.ParseExact(match.Groups["TimeStamp"].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
                     var serverProcessId = int.Parse(match.Groups["ServerProcessId"].Value);
