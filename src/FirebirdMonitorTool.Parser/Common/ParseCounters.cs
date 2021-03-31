@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace FirebirdMonitorTool.Parser.Common
 {
-    public sealed class ParseCounters
+    internal sealed class ParseCounters
     {
         private static readonly Regex s_Regex =
             new Regex(

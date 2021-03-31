@@ -3,7 +3,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Statement
 {
-    public sealed class ParseStatementPrepare : ParseStatementTransaction, IStatementPrepare
+    internal sealed class ParseStatementPrepare : ParseStatementTransaction, IStatementPrepare
     {
         public ParseStatementPrepare(ICommand rawCommand)
             : base(rawCommand)

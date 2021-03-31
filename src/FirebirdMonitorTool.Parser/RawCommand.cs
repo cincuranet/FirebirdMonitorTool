@@ -3,7 +3,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser
 {
-    public class RawCommand : ICommand
+    public sealed class RawCommand : ICommand
     {
         public DateTime TimeStamp { get; }
         public int ServerProcessId { get; }

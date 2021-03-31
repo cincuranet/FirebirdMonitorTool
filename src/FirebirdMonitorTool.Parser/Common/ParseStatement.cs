@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace FirebirdMonitorTool.Parser.Common
 {
-    public sealed class ParseStatement
+    internal sealed class ParseStatement
     {
         public enum Option
         {

@@ -4,7 +4,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Statement
 {
-    public sealed class ParseStatementFinish : ParseStatementTransaction, IStatementFinish
+    internal sealed class ParseStatementFinish : ParseStatementTransaction, IStatementFinish
     {
         public ParseStatementFinish(ICommand rawCommand)
             : base(rawCommand)

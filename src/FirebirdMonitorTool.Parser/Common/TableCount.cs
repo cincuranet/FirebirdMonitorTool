@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Parser.Common
 {
-    public sealed class TableCount : ITableCount
+    internal sealed class TableCount : ITableCount
     {
         public string Name { get; private set; }
         public long? Natural { get; private set; }

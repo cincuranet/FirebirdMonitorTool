@@ -2,7 +2,7 @@
 
 namespace FirebirdMonitorTool.Parser.Attachment
 {
-    public sealed class ParseAttachmentEnd : ParseAttachment, IAttachmentEnd
+    internal sealed class ParseAttachmentEnd : ParseAttachment, IAttachmentEnd
     {
         public ParseAttachmentEnd(ICommand rawCommand)
             : base(rawCommand)

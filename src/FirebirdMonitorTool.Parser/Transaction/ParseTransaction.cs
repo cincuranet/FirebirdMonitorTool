@@ -6,7 +6,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {
-    public abstract class ParseTransaction : ParseAttachment, ITransaction
+    internal abstract class ParseTransaction : ParseAttachment, ITransaction
     {
         private static readonly Regex s_Regex =
             new Regex(

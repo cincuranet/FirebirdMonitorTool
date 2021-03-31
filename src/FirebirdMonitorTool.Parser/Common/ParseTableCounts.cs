@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace FirebirdMonitorTool.Parser.Common
 {
-    public sealed class ParseTableCounts
+    internal sealed class ParseTableCounts
     {
         private const string s_Line1 = "Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge";
         private const string s_Line2 = "***************************************************************************************************************";

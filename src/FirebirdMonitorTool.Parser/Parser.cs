@@ -1,6 +1,5 @@
 using System;
 using FirebirdMonitorTool.Parser.Attachment;
-using FirebirdMonitorTool.Parser.Common;
 using FirebirdMonitorTool.Parser.Statement;
 using FirebirdMonitorTool.Parser.Transaction;
 
@@ -12,7 +11,7 @@ namespace FirebirdMonitorTool.Parser
         {
         }
 
-        public ICommand Parse(ICommand rawCommand)
+        public ParsedCommand Parse(RawCommand rawCommand)
         {
             if (IsCommand(rawCommand, "TRACE_INIT")
                 || IsCommand(rawCommand, "TRACE_FINI"))
@@ -137,7 +136,7 @@ namespace FirebirdMonitorTool.Parser
             }
         }
 
-        private static ICommand HandleParsing(ParsedCommand parsedCommand)
+        private static ParsedCommand HandleParsing(ParsedCommand parsedCommand)
         {
             if (parsedCommand.Parse())
             {
@@ -149,7 +148,7 @@ namespace FirebirdMonitorTool.Parser
             }
         }
 
-        private static bool IsCommand(ICommand rawCommand, string command)
+        private static bool IsCommand(RawCommand rawCommand, string command)
         {
             return rawCommand.Command.StartsWith(command, StringComparison.Ordinal);
         }

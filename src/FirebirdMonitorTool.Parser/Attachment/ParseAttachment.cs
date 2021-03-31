@@ -3,7 +3,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Attachment
 {
-    public abstract class ParseAttachment : ParsedCommand, IAttachment
+    internal abstract class ParseAttachment : ParsedCommand, IAttachment
     {
         private static readonly Regex s_RegexRegular =
             new Regex(

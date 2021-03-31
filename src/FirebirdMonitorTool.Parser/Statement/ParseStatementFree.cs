@@ -2,7 +2,7 @@
 
 namespace FirebirdMonitorTool.Parser.Statement
 {
-    public sealed class ParseStatementFree : ParseStatementAttachment, IStatementFree
+    internal sealed class ParseStatementFree : ParseStatementAttachment, IStatementFree
     {
         public ParseStatementFree(ICommand rawCommand)
             : base(rawCommand)

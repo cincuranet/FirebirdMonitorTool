@@ -4,7 +4,7 @@ using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {
-    public sealed class ParseTransactionEnd : ParseTransaction, ITransactionEnd
+    internal sealed class ParseTransactionEnd : ParseTransaction, ITransactionEnd
     {
         public ParseTransactionEnd(ICommand rawCommand)
             : base(rawCommand)

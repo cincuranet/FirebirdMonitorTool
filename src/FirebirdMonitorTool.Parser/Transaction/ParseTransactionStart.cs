@@ -2,7 +2,7 @@
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {
-    public sealed class ParseTransactionStart : ParseTransaction, ITransactionStart
+    internal sealed class ParseTransactionStart : ParseTransaction, ITransactionStart
     {
         public ParseTransactionStart(ICommand rawCommand)
             : base(rawCommand)
