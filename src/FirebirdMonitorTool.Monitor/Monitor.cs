@@ -19,7 +19,7 @@ namespace FirebirdMonitorTool.Monitor
         private readonly StringBuilder m_TraceMessage;
         private RawCommand m_RawCommand;
 
-        public event EventHandler<ICommand> OnCommand;
+        public event EventHandler<ParsedCommand> OnCommand;
 
         public Monitor()
         {
