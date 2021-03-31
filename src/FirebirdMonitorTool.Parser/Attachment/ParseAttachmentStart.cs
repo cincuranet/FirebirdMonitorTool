@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Parser.Attachment
+﻿namespace FirebirdMonitorTool.Attachment
 {
     internal sealed class ParseAttachmentStart : ParseAttachment, IAttachmentStart
     {

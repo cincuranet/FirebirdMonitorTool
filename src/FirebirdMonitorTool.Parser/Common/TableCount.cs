@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Parser.Common
+﻿namespace FirebirdMonitorTool.Common
 {
     internal sealed class TableCount : ITableCount
     {

@@ -2,9 +2,8 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using FirebirdMonitorTool.Parser;
 
-namespace FirebirdMonitorTool.Monitor
+namespace FirebirdMonitorTool
 {
     public sealed class Monitor
     {
@@ -14,7 +13,7 @@ namespace FirebirdMonitorTool.Monitor
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly object m_Locker;
-        private readonly Parser.Parser m_Parser;
+        private readonly Parser m_Parser;
         private readonly StringBuilder m_TraceMessage;
         private RawCommand m_RawCommand;
 
@@ -23,7 +22,7 @@ namespace FirebirdMonitorTool.Monitor
         public Monitor()
         {
             m_Locker = new object();
-            m_Parser = new Parser.Parser();
+            m_Parser = new Parser();
             m_TraceMessage = new StringBuilder(16 * 1024);
             m_RawCommand = null;
         }

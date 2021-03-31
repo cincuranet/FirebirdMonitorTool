@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Parser.Attachment
+﻿namespace FirebirdMonitorTool.Attachment
 {
     public interface IAttachmentStart : IAttachment
     {

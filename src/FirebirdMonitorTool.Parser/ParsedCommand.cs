@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
-using FirebirdMonitorTool.Parser.Common;
+using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Parser
+namespace FirebirdMonitorTool
 {
     public abstract class ParsedCommand : ICommand
     {

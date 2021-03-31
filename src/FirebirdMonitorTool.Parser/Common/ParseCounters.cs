@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace FirebirdMonitorTool.Parser.Common
+namespace FirebirdMonitorTool.Common
 {
     internal sealed class ParseCounters
     {

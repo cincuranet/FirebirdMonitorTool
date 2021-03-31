@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FirebirdMonitorTool.Parser.Attachment;
+using FirebirdMonitorTool.Attachment;
 
-namespace FirebirdMonitorTool.Parser.Transaction
+namespace FirebirdMonitorTool.Transaction
 {
     internal abstract class ParseTransaction : ParseAttachment, ITransaction
     {

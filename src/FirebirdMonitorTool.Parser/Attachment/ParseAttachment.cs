@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace FirebirdMonitorTool.Parser.Attachment
+namespace FirebirdMonitorTool.Attachment
 {
     internal abstract class ParseAttachment : ParsedCommand, IAttachment
     {

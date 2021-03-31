@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using FirebirdMonitorTool.Parser;
-using FirebirdMonitorTool.Parser.Attachment;
-using FirebirdMonitorTool.Parser.Statement;
-using FirebirdMonitorTool.Parser.Transaction;
+using FirebirdMonitorTool;
+using FirebirdMonitorTool.Attachment;
+using FirebirdMonitorTool.Statement;
+using FirebirdMonitorTool.Transaction;
 using NUnit.Framework;
 
 namespace FirebirdMonitorTool.Tests
@@ -19,7 +19,7 @@ namespace FirebirdMonitorTool.Tests
             const string Message = @"    GoOnline (ATT_108, PPWLOCAL\DVDWOUWE:NONE, NONE, XNET:SATIRIX)
     D:\Firebird\Firebird-2.5.2.26539-0_x64-3050\bin\isql.exe:8260 ";
             var rawTraceData = new RawCommand(DateTime.Now, default, default, AttachDatabase) { TraceMessage = Message };
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var attachDatabaseCommand = parser.Parse(rawTraceData) as IAttachmentStart;
             Assert.IsNotNull(attachDatabaseCommand);
             Assert.AreEqual("GoOnline", attachDatabaseCommand.DatabaseName);
@@ -39,7 +39,7 @@ namespace FirebirdMonitorTool.Tests
             const string Message = @"    GoOnline (ATT_107, PPWLOCAL\DVDWOUWE:NONE, NONE, XNET:SATIRIX)
     D:\Firebird\Firebird-2.5.2.26539-0_x64-3050\bin\isql.exe:8688 ";
             var rawTraceData = new RawCommand(DateTime.Now, default, default, DetachDatabase) { TraceMessage = Message };
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var detachAttacmentCommand = parser.Parse(rawTraceData) as IAttachmentEnd;
             Assert.IsNotNull(detachAttacmentCommand);
             Assert.AreEqual("GoOnline", detachAttacmentCommand.DatabaseName);
@@ -60,7 +60,7 @@ namespace FirebirdMonitorTool.Tests
     D:\Firebird\Firebird-2.5.2.26539-0_x64-3050\bin\isql.exe:8260
         (TRA_7437, CONCURRENCY | WAIT | READ_WRITE) ";
             var rawTraceData = new RawCommand(DateTime.Now, default, default, StartTransaction) { TraceMessage = Message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var startTransactionCommand = parser.Parse(rawTraceData) as ITransactionStart;
             Assert.IsNotNull(startTransactionCommand);
             Assert.AreEqual(7437L, startTransactionCommand.TransactionId);
@@ -79,7 +79,7 @@ namespace FirebirdMonitorTool.Tests
     D:\Firebird\Firebird-2.5.2.26539-0_x64-3050\bin\isql.exe:8260
         (TRA_7438, READ_COMMITTED | NO_REC_VERSION | WAIT | READ_WRITE) ";
             var rawTraceData = new RawCommand(DateTime.Now, default, default, StartTransaction) { TraceMessage = Message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var startTransactionCommand = parser.Parse(rawTraceData) as ITransactionStart;
             Assert.IsNotNull(startTransactionCommand);
             Assert.AreEqual(7438L, startTransactionCommand.TransactionId);
@@ -99,7 +99,7 @@ namespace FirebirdMonitorTool.Tests
         (TRA_7437, CONCURRENCY | WAIT | READ_WRITE)
      35 ms, 1 read(s), 1 write(s), 1 fetch(es), 1 mark(s) ";
             var rawTraceData = new RawCommand(DateTime.Now, default, default, CommitTransaction) { TraceMessage = Message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var endTransactionCommand = parser.Parse(rawTraceData) as ITransactionEnd;
             Assert.IsNotNull(endTransactionCommand);
             Assert.AreEqual(35, endTransactionCommand.ElapsedTime.TotalMilliseconds);
@@ -114,7 +114,7 @@ namespace FirebirdMonitorTool.Tests
         {
             var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Prepare_Plan_NoParams_NoTableCount.txt");
             var rawTraceData = new RawCommand(DateTime.Now, default, default, PrepareStatement) { TraceMessage = message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var prepareStatementCommand = parser.Parse(rawTraceData) as IStatementPrepare;
             Assert.IsNotNull(prepareStatementCommand);
             Assert.AreEqual(34L, prepareStatementCommand.StatementId);
@@ -128,7 +128,7 @@ namespace FirebirdMonitorTool.Tests
         {
             var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_Plan_NoParams_TableCounts.txt");
             var rawTraceData = new RawCommand(DateTime.Now, default, default, ExecuteStatementFinish) { TraceMessage = message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var finishStatementCommand = parser.Parse(rawTraceData) as IStatementFinish;
             Assert.IsNotNull(finishStatementCommand);
             Assert.AreEqual(37L, finishStatementCommand.StatementId);
@@ -198,7 +198,7 @@ namespace FirebirdMonitorTool.Tests
         {
             var message = File.ReadAllText(@"Messages\RawTraceData_Statement_Start_NoPlan_Params_TableCounts.txt");
             var rawTraceData = new RawCommand(DateTime.Now, default, default, ExecuteStatementFinish) { TraceMessage = message};
-            var parser = new Parser.Parser();
+            var parser = new Parser();
             var finishStatementCommand = parser.Parse(rawTraceData) as IStatementFinish;
             Assert.IsNotNull(finishStatementCommand);
             Assert.AreEqual(625L, finishStatementCommand.StatementId);

@@ -8,8 +8,7 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\FirebirdMonitorTool.Monitor\FirebirdMonitorTool.Monitor.csproj" />
-        <ProjectReference Include="..\FirebirdMonitorTool.Parser\FirebirdMonitorTool.Parser.csproj" />
+        <ProjectReference Include="..\FirebirdMonitorTool.Parser\FirebirdMonitorTool.csproj" />
     </ItemGroup>
     <ItemGroup>
       <None Update="Messages\*">

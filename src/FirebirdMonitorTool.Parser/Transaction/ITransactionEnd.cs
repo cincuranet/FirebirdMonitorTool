@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FirebirdMonitorTool.Parser.Transaction
+namespace FirebirdMonitorTool.Transaction
 {
     public interface ITransactionEnd : ITransaction
     {

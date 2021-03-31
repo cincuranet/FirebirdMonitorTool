@@ -1,4 +1,4 @@
-﻿namespace FirebirdMonitorTool.Parser.Transaction
+﻿namespace FirebirdMonitorTool.Transaction
 {
     internal sealed class ParseTransactionStart : ParseTransaction, ITransactionStart
     {

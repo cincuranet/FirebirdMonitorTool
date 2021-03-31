@@ -1,7 +1,7 @@
 ﻿using System;
-using FirebirdMonitorTool.Parser.Attachment;
+using FirebirdMonitorTool.Attachment;
 
-namespace FirebirdMonitorTool.Parser.Transaction
+namespace FirebirdMonitorTool.Transaction
 {
     public interface ITransaction : IAttachment
     {

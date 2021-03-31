@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FirebirdMonitorTool.Parser.Common
+namespace FirebirdMonitorTool.Common
 {
     internal sealed class ParseTableCounts
     {

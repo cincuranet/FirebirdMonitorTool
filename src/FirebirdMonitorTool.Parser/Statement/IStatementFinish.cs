@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using FirebirdMonitorTool.Parser.Common;
-using FirebirdMonitorTool.Parser.Transaction;
+using FirebirdMonitorTool.Common;
+using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Parser.Statement
+namespace FirebirdMonitorTool.Statement
 {
     public interface IStatementFinish : IStatement, ITransaction
     {

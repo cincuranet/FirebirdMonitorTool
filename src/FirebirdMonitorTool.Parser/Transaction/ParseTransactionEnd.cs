@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using FirebirdMonitorTool.Parser.Common;
+using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Parser.Transaction
+namespace FirebirdMonitorTool.Transaction
 {
     internal sealed class ParseTransactionEnd : ParseTransaction, ITransactionEnd
     {

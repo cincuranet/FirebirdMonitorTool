@@ -1,6 +1,6 @@
-﻿using FirebirdMonitorTool.Parser.Common;
+﻿using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Parser.Attachment
+namespace FirebirdMonitorTool.Attachment
 {
     public interface IAttachment : ICommand
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace FirebirdMonitorTool.Parser.Common
+namespace FirebirdMonitorTool.Common
 {
     internal sealed class ParseStatement
     {

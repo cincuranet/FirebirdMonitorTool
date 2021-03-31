@@ -1,7 +1,7 @@
 ﻿using System;
-using FirebirdMonitorTool.Parser.Common;
+using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Parser
+namespace FirebirdMonitorTool
 {
     public sealed class RawCommand : ICommand
     {

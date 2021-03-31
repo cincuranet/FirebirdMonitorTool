@@ -1,6 +1,6 @@
-﻿using FirebirdMonitorTool.Parser.Attachment;
+﻿using FirebirdMonitorTool.Attachment;
 
-namespace FirebirdMonitorTool.Parser.Statement
+namespace FirebirdMonitorTool.Statement
 {
     internal abstract class ParseStatementAttachment : ParseAttachment
     {

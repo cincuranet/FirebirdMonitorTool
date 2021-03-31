@@ -1,6 +1,6 @@
-﻿using FirebirdMonitorTool.Parser.Common;
+﻿using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Parser.Statement
+namespace FirebirdMonitorTool.Statement
 {
     internal sealed class ParseStatementFree : ParseStatementAttachment, IStatementFree
     {

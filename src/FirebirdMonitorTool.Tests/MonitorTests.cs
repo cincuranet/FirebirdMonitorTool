@@ -10,7 +10,7 @@ namespace FirebirdMonitorTool.Tests
         [Test]
         public void TraceFile()
         {
-            var m = new Monitor.Monitor();
+            var m = new Monitor();
             var data = File.ReadLines(@"C:\Users\Jiri\Downloads\trace.txt");
             foreach (var line in data)
             {

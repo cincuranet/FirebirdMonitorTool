@@ -1,6 +1,6 @@
-﻿using FirebirdMonitorTool.Parser.Transaction;
+﻿using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Parser.Statement
+namespace FirebirdMonitorTool.Statement
 {
     internal abstract class ParseStatementTransaction : ParseTransaction
     {

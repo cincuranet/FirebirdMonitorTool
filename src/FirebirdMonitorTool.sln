@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirebirdMonitorTool.Parser", "FirebirdMonitorTool.Parser\FirebirdMonitorTool.Parser.csproj", "{DACE7466-8947-4B17-9AC2-B00A48538919}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirebirdMonitorTool", "FirebirdMonitorTool.Parser\FirebirdMonitorTool.csproj", "{DACE7466-8947-4B17-9AC2-B00A48538919}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA3E2FA5-71B1-40B1-8C0B-EFAB88DA0FF7}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirebirdMonitorTool.Monitor", "FirebirdMonitorTool.Monitor\FirebirdMonitorTool.Monitor.csproj", "{E45CA429-BA44-45BC-86EA-BC961C7C10FB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirebirdMonitorTool.Tests", "FirebirdMonitorTool.Tests\FirebirdMonitorTool.Tests.csproj", "{B023EA14-BEFE-4879-B9F7-AD2235C4A099}"
 EndProject
@@ -25,10 +23,6 @@ Global
 		{DACE7466-8947-4B17-9AC2-B00A48538919}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DACE7466-8947-4B17-9AC2-B00A48538919}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DACE7466-8947-4B17-9AC2-B00A48538919}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E45CA429-BA44-45BC-86EA-BC961C7C10FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E45CA429-BA44-45BC-86EA-BC961C7C10FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E45CA429-BA44-45BC-86EA-BC961C7C10FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E45CA429-BA44-45BC-86EA-BC961C7C10FB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B023EA14-BEFE-4879-B9F7-AD2235C4A099}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B023EA14-BEFE-4879-B9F7-AD2235C4A099}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B023EA14-BEFE-4879-B9F7-AD2235C4A099}.Release|Any CPU.ActiveCfg = Release|Any CPU

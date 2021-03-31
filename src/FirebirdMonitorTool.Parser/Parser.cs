@@ -1,9 +1,9 @@
 using System;
-using FirebirdMonitorTool.Parser.Attachment;
-using FirebirdMonitorTool.Parser.Statement;
-using FirebirdMonitorTool.Parser.Transaction;
+using FirebirdMonitorTool.Attachment;
+using FirebirdMonitorTool.Statement;
+using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Parser
+namespace FirebirdMonitorTool
 {
     public class Parser
     {
