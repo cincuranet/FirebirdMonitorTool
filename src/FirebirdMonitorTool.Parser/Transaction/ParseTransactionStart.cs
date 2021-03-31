@@ -1,10 +1,8 @@
-﻿using FirebirdMonitorTool.Parser.Common;
-
-namespace FirebirdMonitorTool.Parser.Transaction
+﻿namespace FirebirdMonitorTool.Parser.Transaction
 {
     internal sealed class ParseTransactionStart : ParseTransaction, ITransactionStart
     {
-        public ParseTransactionStart(ICommand rawCommand)
+        public ParseTransactionStart(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

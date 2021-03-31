@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Attachment
 {
@@ -15,7 +14,7 @@ namespace FirebirdMonitorTool.Parser.Attachment
                 @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s<internal>\)\s+(?=\(TRA_|Statement|\s*)",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        protected ParseAttachment(ICommand rawCommand)
+        protected ParseAttachment(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

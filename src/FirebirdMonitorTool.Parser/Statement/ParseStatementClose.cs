@@ -4,7 +4,7 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     internal sealed class ParseStatementClose : ParseStatementAttachment, IStatementClose
     {
-        public ParseStatementClose(ICommand rawCommand)
+        public ParseStatementClose(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

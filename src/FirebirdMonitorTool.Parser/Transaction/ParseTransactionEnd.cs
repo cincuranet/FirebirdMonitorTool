@@ -6,7 +6,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
 {
     internal sealed class ParseTransactionEnd : ParseTransaction, ITransactionEnd
     {
-        public ParseTransactionEnd(ICommand rawCommand)
+        public ParseTransactionEnd(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Parser.Attachment;
-using FirebirdMonitorTool.Parser.Common;
 
 namespace FirebirdMonitorTool.Parser.Transaction
 {
@@ -18,7 +17,7 @@ namespace FirebirdMonitorTool.Parser.Transaction
                 @"^\s*WAIT\s(?<Number>\d+)",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        protected ParseTransaction(ICommand rawCommand)
+        protected ParseTransaction(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

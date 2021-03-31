@@ -6,11 +6,11 @@ namespace FirebirdMonitorTool.Parser
 {
     public abstract class ParsedCommand : ICommand
     {
-        private readonly ICommand m_RawCommand;
+        private readonly RawCommand m_RawCommand;
 
         private readonly StringBuilder m_WorkingMessage;
 
-        protected ParsedCommand(ICommand rawCommand)
+        protected ParsedCommand(RawCommand rawCommand)
         {
             m_RawCommand = rawCommand;
             m_WorkingMessage = new StringBuilder(m_RawCommand.TraceMessage);

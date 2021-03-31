@@ -5,7 +5,7 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     internal sealed class ParseStatementStart : ParseStatementTransaction, IStatementStart
     {
-        public ParseStatementStart(ICommand rawCommand)
+        public ParseStatementStart(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

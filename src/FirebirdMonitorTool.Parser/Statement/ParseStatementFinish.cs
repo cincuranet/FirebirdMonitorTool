@@ -6,7 +6,7 @@ namespace FirebirdMonitorTool.Parser.Statement
 {
     internal sealed class ParseStatementFinish : ParseStatementTransaction, IStatementFinish
     {
-        public ParseStatementFinish(ICommand rawCommand)
+        public ParseStatementFinish(RawCommand rawCommand)
             : base(rawCommand)
         {
         }
