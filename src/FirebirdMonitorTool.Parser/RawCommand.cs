@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Common;
 
 namespace FirebirdMonitorTool
 {
     public sealed class RawCommand : ICommand
     {
+        public static string TimeStampFormat { get; } = @"yyyy-MM-ddTHH:mm:ss\.ffff";
+        public static Regex StartOfTrace { get; } =
+            new Regex(
+                @"^(?<TimeStamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{4})\s+\((?<ServerProcessId>\d+):(?<InternalTraceId>[0-9,A-F]+)\)\s+(?<Command>[0-9,A-Z,a-z,_,\x20,:]+)\s*$",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         public DateTime TimeStamp { get; }
         public int ServerProcessId { get; }
         public long InternalTraceId { get; }

@@ -11,7 +11,7 @@ namespace FirebirdMonitorTool.Tests
         public void TraceFile()
         {
             var m = new Monitor();
-            var data = File.ReadLines(@"C:\Users\Jiri\Downloads\trace.txt");
+            var data = File.ReadLines(@"I:\Downloads\trace.txt");
             foreach (var line in data)
             {
                 m.Process(line + Environment.NewLine);

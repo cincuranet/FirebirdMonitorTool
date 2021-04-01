@@ -12,6 +12,6 @@ namespace FirebirdMonitorTool.Attachment
         string RemoteProtocol { get; }
         string RemoteAddress { get; }
         string RemoteProcessName { get; }
-        long RemoteProcessId { get; }
+        long? RemoteProcessId { get; }
     }
 }

@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace FirebirdMonitorTool
 {
     public sealed class Monitor
     {
-        private static readonly Regex s_StartOfTrace =
-            new Regex(
-                @"^(?<TimeStamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{4})\s+\((?<ServerProcessId>\d+):(?<InternalTraceId>[0-9,A-F]+)\)\s+(?<Command>[0-9,A-Z,a-z,_,\x20,:]+)\s*$",
-                RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
         private readonly object m_Locker;
         private readonly Parser m_Parser;
         private readonly StringBuilder m_TraceMessage;
@@ -35,11 +29,11 @@ namespace FirebirdMonitorTool
             }
             lock (m_Locker)
             {
-                var match = s_StartOfTrace.Match(input);
+                var match = RawCommand.StartOfTrace.Match(input);
                 if (match.Success)
                 {
                     FlushImpl();
-                    var timeStamp = DateTime.ParseExact(match.Groups["TimeStamp"].Value, @"yyyy-MM-ddTHH:mm:ss\.ffff", CultureInfo.InvariantCulture);
+                    var timeStamp = DateTime.ParseExact(match.Groups["TimeStamp"].Value, RawCommand.TimeStampFormat, CultureInfo.InvariantCulture);
                     var serverProcessId = int.Parse(match.Groups["ServerProcessId"].Value);
                     var internalTraceId = long.Parse(match.Groups["InternalTraceId"].Value, NumberStyles.HexNumber);
                     var command = match.Groups["Command"].Value;

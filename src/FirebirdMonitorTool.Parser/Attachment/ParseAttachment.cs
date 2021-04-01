@@ -4,14 +4,9 @@ namespace FirebirdMonitorTool.Attachment
 {
     internal abstract class ParseAttachment : ParsedCommand, IAttachment
     {
-        private static readonly Regex s_RegexRegular =
+        private static readonly Regex s_Regex =
             new Regex(
-                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s(?<RemoteProtocol>.+):(?<RemoteAddress>.+)\)\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+)\s+(?=\(TRA_|Statement|\s*)",
-                RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-        private static readonly Regex s_RegexInternal =
-            new Regex(
-                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s<internal>\)\s+(?=\(TRA_|Statement|\s*)",
+                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s((?<RemoteProtocol>[A-Za-z0-9]{4,}):(?<RemoteAddress>.+)?|<internal>)\)\s+((?<RemoteProcessName>.+):(?<RemoteProcessId>\d+))?\s+(?=\(TRA_|Statement|\s*)",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         protected ParseAttachment(RawCommand rawCommand)
@@ -27,16 +22,11 @@ namespace FirebirdMonitorTool.Attachment
         public string RemoteProtocol { get; private set; }
         public string RemoteAddress { get; private set; }
         public string RemoteProcessName { get; private set; }
-        public long RemoteProcessId { get; private set; }
+        public long? RemoteProcessId { get; private set; }
 
         public override bool Parse()
         {
-            return ParseRegular() || ParseInternal() || false;
-        }
-
-        private bool ParseRegular()
-        {
-            var match = s_RegexRegular.Match(Message);
+            var match = s_Regex.Match(Message);
             var result = match.Success;
             if (result)
             {
@@ -46,30 +36,9 @@ namespace FirebirdMonitorTool.Attachment
                 Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
                 CharacterSet = match.Groups["Charset"].Value;
                 RemoteProtocol = match.Groups["RemoteProtocol"].Value;
-                RemoteAddress = match.Groups["RemoteAddress"].Value;
-                RemoteProcessName = match.Groups["RemoteProcessName"].Value;
-                RemoteProcessId = long.Parse(match.Groups["RemoteProcessId"].Value);
-                RemoveFirstCharactersOfMessage(match.Groups[0].Length);
-                return true;
-            }
-            return false;
-        }
-
-        private bool ParseInternal()
-        {
-            var match = s_RegexInternal.Match(Message);
-            var result = match.Success;
-            if (result)
-            {
-                DatabaseName = match.Groups["DatabaseName"].Value;
-                ConnectionId = long.Parse(match.Groups["ConnectionId"].Value);
-                User = match.Groups["User"].Value;
-                Role = match.Groups["Role"].Success ? match.Groups["Role"].Value : default;
-                CharacterSet = match.Groups["Charset"].Value;
-                RemoteProtocol = "internal";
-                RemoteAddress = default;
-                RemoteProcessName = default;
-                RemoteProcessId = default;
+                RemoteAddress = match.Groups["RemoteAddress"].Success ? match.Groups["RemoteAddress"].Value : default;
+                RemoteProcessName = match.Groups["RemoteProcessName"].Success ? match.Groups["RemoteProcessName"].Value : default;
+                RemoteProcessId = match.Groups["RemoteProcessId"].Success ? long.Parse(match.Groups["RemoteProcessId"].Value) : default(long?);
                 RemoveFirstCharactersOfMessage(match.Groups[0].Length);
                 return true;
             }

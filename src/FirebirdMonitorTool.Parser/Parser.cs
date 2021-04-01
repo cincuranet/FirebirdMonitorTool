@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Transaction;
@@ -132,7 +133,7 @@ namespace FirebirdMonitorTool
             }
             else
             {
-                throw new InvalidOperationException($"Unknown command '{rawCommand.Command}'.");
+                throw new InvalidOperationException($"Unknown command '{rawCommand.Command}' from '{rawCommand.TimeStamp.ToString(RawCommand.TimeStampFormat)}'.");
             }
         }
 
@@ -144,7 +145,7 @@ namespace FirebirdMonitorTool
             }
             else
             {
-                throw new InvalidOperationException($"Unable to parse command '{parsedCommand.Command}'.");
+                throw new InvalidOperationException($"Unable to parse command '{parsedCommand.Command}' from '{parsedCommand.TimeStamp.ToString(RawCommand.TimeStampFormat)}'.");
             }
         }
 
