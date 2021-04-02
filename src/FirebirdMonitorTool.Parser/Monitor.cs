@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Text;
 
 namespace FirebirdMonitorTool
@@ -29,19 +28,18 @@ namespace FirebirdMonitorTool
             }
             lock (m_Locker)
             {
-                var match = RawCommand.StartOfTrace.Match(input);
-                if (match.Success)
+                var rawCommand = RawCommand.TryMatch(input);
+                if (rawCommand != null)
                 {
                     FlushImpl();
-                    var timeStamp = DateTime.ParseExact(match.Groups["TimeStamp"].Value, RawCommand.TimeStampFormat, CultureInfo.InvariantCulture);
-                    var serverProcessId = int.Parse(match.Groups["ServerProcessId"].Value);
-                    var internalTraceId = long.Parse(match.Groups["InternalTraceId"].Value, NumberStyles.HexNumber);
-                    var command = match.Groups["Command"].Value;
-                    m_RawCommand = new RawCommand(timeStamp, serverProcessId, internalTraceId, command);
+                    m_RawCommand = rawCommand;
                 }
-                else if (m_RawCommand != null)
+                else
                 {
-                    m_TraceMessage.Append(input);
+                    if (m_RawCommand != null)
+                    {
+                        m_TraceMessage.Append(input);
+                    }
                 }
             }
         }

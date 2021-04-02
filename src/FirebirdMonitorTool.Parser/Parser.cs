@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Transaction;
