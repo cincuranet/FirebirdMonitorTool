@@ -1,6 +1,7 @@
 using System;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Statement;
+using FirebirdMonitorTool.Trace;
 using FirebirdMonitorTool.Transaction;
 
 namespace FirebirdMonitorTool
@@ -13,12 +14,15 @@ namespace FirebirdMonitorTool
 
         public ParsedCommand Parse(RawCommand rawCommand)
         {
-            if (IsCommand(rawCommand, "TRACE_INIT")
-                || IsCommand(rawCommand, "TRACE_FINI"))
+            if (IsCommand(rawCommand, "TRACE_INIT"))
             {
                 // see "TracePluginImpl::log_init" for the magic strings
+                return HandleParsing(new ParseTraceStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "TRACE_FINI"))
+            {
                 // see "TracePluginImpl::log_finalize" for the magic strings
-                return null;
+                return HandleParsing(new ParseTraceEnd(rawCommand));
             }
             else if (IsCommand(rawCommand, "CREATE_DATABASE")
                 || IsCommand(rawCommand, "ATTACH_DATABASE")
