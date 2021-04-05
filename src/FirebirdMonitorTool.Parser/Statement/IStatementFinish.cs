@@ -9,7 +9,7 @@ namespace FirebirdMonitorTool.Statement
     {
         IReadOnlyList<string> Params { get; }
         IReadOnlyList<ITableCount> TableCounts { get; }
-        long RecordsFetched { get; }
+        long? RecordsFetched { get; }
         TimeSpan ElapsedTime { get; }
         long? Reads { get; }
         long? Writes { get; }

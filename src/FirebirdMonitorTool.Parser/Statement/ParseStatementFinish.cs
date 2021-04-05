@@ -16,7 +16,7 @@ namespace FirebirdMonitorTool.Statement
         public string Plan { get; private set; }
         public IReadOnlyList<string> Params { get; private set; }
         public IReadOnlyList<ITableCount> TableCounts { get; private set; }
-        public long RecordsFetched { get; private set; }
+        public long? RecordsFetched { get; private set; }
         public TimeSpan ElapsedTime { get; private set; }
         public long? Reads { get; private set; }
         public long? Writes { get; private set; }
@@ -37,7 +37,7 @@ namespace FirebirdMonitorTool.Statement
                     Text = statement.Text;
                     Plan = statement.Plan;
                     Params = statement.Params;
-                    RecordsFetched = statement.RecordsFetched ?? -1L;
+                    RecordsFetched = statement.RecordsFetched;
                     RemoveFirstCharactersOfMessage(statement.CharactersParsed);
                 }
             }

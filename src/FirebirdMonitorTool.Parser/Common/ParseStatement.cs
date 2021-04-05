@@ -48,8 +48,8 @@ namespace FirebirdMonitorTool.Common
         public string Plan { get; private set; }
         public long? RecordsFetched { get; private set; }
         public TimeSpan? ElapsedTime { get; private set; }
-        public int CharactersParsed { get; private set; }
         public IReadOnlyList<string> Params { get; private set; }
+        public int CharactersParsed { get; private set; }
 
         public bool Parse(Option option)
         {
@@ -74,7 +74,7 @@ namespace FirebirdMonitorTool.Common
                         ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(statementMatch.Groups["Number"].Value));
                         break;
                 }
-                CharactersParsed += statementMatch.Groups[0].Length;
+                CharactersParsed = statementMatch.Groups[0].Length;
             }
 
             // Check for a plan
