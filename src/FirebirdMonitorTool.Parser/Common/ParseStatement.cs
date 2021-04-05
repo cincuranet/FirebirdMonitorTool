@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace FirebirdMonitorTool.Common
@@ -30,11 +29,6 @@ namespace FirebirdMonitorTool.Common
             new Regex(
                 @"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s*(?<Number>\d+)\sms",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
-
-        private static readonly Regex s_RegexParam =
-            new Regex(
-                @"(param\d+\s=\s.+)$",
-                RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public string Message { get; private set; }
 
@@ -86,7 +80,11 @@ namespace FirebirdMonitorTool.Common
                     //  With Plan
                     Plan = Text.Substring(index + s_PlanSeparator.Length, Text.Length - (index + s_PlanSeparator.Length)).Trim();
                     Text = Text.Substring(0, index).TrimEnd();
-                    Params = GetParams(Plan).ToList();
+                    var parseParams = new ParseParams(Plan);
+                    if (parseParams.Parse())
+                    {
+                        Params = parseParams.Params;
+                    }
                     if (Params.Count > 0)
                     {
                         // Re-evaluate Plan again
@@ -97,7 +95,11 @@ namespace FirebirdMonitorTool.Common
                 else
                 {
                     // No plan
-                    Params = GetParams(Text).ToList();
+                    var parseParams = new ParseParams(Text);
+                    if (parseParams.Parse())
+                    {
+                        Params = parseParams.Params;
+                    }
                     if (Params.Count > 0)
                     {
                         // Re-evaluate Text again
@@ -108,15 +110,6 @@ namespace FirebirdMonitorTool.Common
             }
 
             return statementMatch.Success;
-        }
-
-        private static IEnumerable<string> GetParams(string text)
-        {
-            return from line in text.Split(new[] { '\n', '\r' })
-                   select s_RegexParam.Match(line)
-                   into match
-                   where match.Success
-                   select match.Groups[1].Value;
         }
     }
 }
