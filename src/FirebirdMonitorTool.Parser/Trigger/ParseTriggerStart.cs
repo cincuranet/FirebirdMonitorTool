@@ -1,8 +1,8 @@
-﻿namespace FirebirdMonitorTool.Trace
+﻿namespace FirebirdMonitorTool.Trigger
 {
-    internal sealed class ParseTraceEnd : ParseTrace, ITraceEnd
+    internal sealed class ParseTriggerStart : ParseTrigger, ITriggerStart
     {
-        public ParseTraceEnd(RawCommand rawCommand)
+        public ParseTriggerStart(RawCommand rawCommand)
             : base(rawCommand)
         {
         }

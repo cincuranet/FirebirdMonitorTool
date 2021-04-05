@@ -3,6 +3,7 @@ using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
 using FirebirdMonitorTool.Transaction;
+using FirebirdMonitorTool.Trigger;
 
 namespace FirebirdMonitorTool
 {
@@ -95,14 +96,18 @@ namespace FirebirdMonitorTool
                 return HandleParsing(new ParseStatementClose(rawCommand));
             }
             else if (IsCommand(rawCommand, "EXECUTE_TRIGGER_START")
-                || IsCommand(rawCommand, "EXECUTE_TRIGGER_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_TRIGGER_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_TRIGGER_START"))
+            {
+                // see "TracePluginImpl::log_event_trigger_execute" for magic strings
+                return HandleParsing(new ParseTriggerStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_TRIGGER_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_TRIGGER_FINISH")
-                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_TRIGGER_START")
                 || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_TRIGGER_FINISH"))
             {
                 // see "TracePluginImpl::log_event_trigger_execute" for magic strings
-                return null;
+                return HandleParsing(new ParseTriggerEnd(rawCommand));
             }
             else if (IsCommand(rawCommand, "EXECUTE_PROCEDURE_START")
                 || IsCommand(rawCommand, "EXECUTE_PROCEDURE_FINISH")

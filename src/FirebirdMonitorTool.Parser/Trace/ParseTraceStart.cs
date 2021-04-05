@@ -9,7 +9,7 @@
 
         public override bool Parse()
         {
-            return base.Parse();
+            return base.Parse() && string.IsNullOrWhiteSpace(Message);
         }
     }
 }
