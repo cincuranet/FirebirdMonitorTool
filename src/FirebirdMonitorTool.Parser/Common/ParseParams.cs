@@ -9,7 +9,7 @@ namespace FirebirdMonitorTool.Common
     {
         private static readonly Regex s_Regex =
             new Regex(
-                @"^(param\d+\s=\s.+,\s"".+"")$",
+                @"(param\d+\s=\s.+,\s"".+"")$",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         public string Message { get; private set; }
