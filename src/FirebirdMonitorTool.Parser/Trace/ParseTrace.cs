@@ -26,9 +26,8 @@ namespace FirebirdMonitorTool.Trace
                 SessionId = long.Parse(match.Groups["SessionId"].Value);
                 SessionName = match.Groups["SessionName"].Value;
                 RemoveFirstCharactersOfMessage(match.Groups[0].Length);
-                return true;
             }
-            return false;
+            return result;
         }
     }
 }

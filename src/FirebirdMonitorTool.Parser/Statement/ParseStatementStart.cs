@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FirebirdMonitorTool.Common;
+﻿using FirebirdMonitorTool.Common;
 
 namespace FirebirdMonitorTool.Statement
 {
@@ -13,7 +12,7 @@ namespace FirebirdMonitorTool.Statement
         public long StatementId { get; private set; }
         public string Text { get; private set; }
         public string Plan { get; private set; }
-        public IReadOnlyList<string> Params { get; private set; }
+        public string Params { get; private set; }
 
         public override bool Parse()
         {

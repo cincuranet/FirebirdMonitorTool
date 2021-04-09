@@ -1,5 +1,6 @@
 using System;
 using FirebirdMonitorTool.Attachment;
+using FirebirdMonitorTool.Function;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
 using FirebirdMonitorTool.Transaction;
@@ -110,24 +111,34 @@ namespace FirebirdMonitorTool
                 return HandleParsing(new ParseTriggerEnd(rawCommand));
             }
             else if (IsCommand(rawCommand, "EXECUTE_PROCEDURE_START")
-                || IsCommand(rawCommand, "EXECUTE_PROCEDURE_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_PROCEDURE_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_START"))
+            {
+                // see "TracePluginImpl::log_event_proc_execute" for magic strings
+                //return HandleParsing(new ParseProcedureStart(rawCommand));
+                return null;
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_PROCEDURE_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_PROCEDURE_FINISH")
-                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_START")
                 || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_FINISH"))
             {
                 // see "TracePluginImpl::log_event_proc_execute" for magic strings
+                //return HandleParsing(new ParseProcedureEnd(rawCommand));
                 return null;
             }
             else if (IsCommand(rawCommand, "EXECUTE_FUNCTION_START")
-                || IsCommand(rawCommand, "EXECUTE_FUNCTION_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_FUNCTION_START")
+                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_FUNCTION_START"))
+            {
+                // see "TracePluginImpl::log_event_func_execute" for magic strings
+                return HandleParsing(new ParseFunctionStart(rawCommand));
+            }
+            else if (IsCommand(rawCommand, "EXECUTE_FUNCTION_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_FUNCTION_FINISH")
-                || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_FUNCTION_START")
                 || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_FUNCTION_FINISH"))
             {
                 // see "TracePluginImpl::log_event_func_execute" for magic strings
-                return null;
+                return HandleParsing(new ParseFunctionEnd(rawCommand));
             }
             else if (IsCommand(rawCommand, "SET_CONTEXT"))
             {

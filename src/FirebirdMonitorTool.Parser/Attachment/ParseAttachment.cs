@@ -40,9 +40,8 @@ namespace FirebirdMonitorTool.Attachment
                 RemoteProcessName = match.Groups["RemoteProcessName"].Success ? match.Groups["RemoteProcessName"].Value : default;
                 RemoteProcessId = match.Groups["RemoteProcessId"].Success ? long.Parse(match.Groups["RemoteProcessId"].Value) : default(long?);
                 RemoveFirstCharactersOfMessage(match.Groups[0].Length);
-                return true;
             }
-            return false;
+            return result;
         }
     }
 }

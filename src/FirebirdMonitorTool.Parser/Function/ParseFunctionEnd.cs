@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Statement
+namespace FirebirdMonitorTool.Function
 {
-    internal sealed class ParseStatementFinish : ParseStatementTransaction, IStatementFinish
+    internal sealed class ParseFunctionEnd : ParseFunction, IFunctionEnd
     {
-        public ParseStatementFinish(RawCommand rawCommand)
+        private static readonly Regex s_Params =
+            new Regex(
+                @"^(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
+
+        public ParseFunctionEnd(RawCommand rawCommand)
             : base(rawCommand)
         {
         }
 
-        public long StatementId { get; private set; }
-        public string Text { get; private set; }
-        public string Plan { get; private set; }
         public string Params { get; private set; }
         public IReadOnlyList<ITableCount> TableCounts { get; private set; }
         public long? RecordsFetched { get; private set; }
@@ -29,16 +32,13 @@ namespace FirebirdMonitorTool.Statement
 
             if (result)
             {
-                var statement = new ParseStatement(Message);
-                result = statement.Parse(ParseStatement.Option.RECORDS_FETCHED);
+                var match = s_Params.Match(Message);
+                result = match.Success;
                 if (result)
                 {
-                    StatementId = statement.Id;
-                    Text = statement.Text;
-                    Plan = statement.Plan;
-                    Params = statement.Params;
-                    RecordsFetched = statement.RecordsFetched;
-                    RemoveFirstCharactersOfMessage(statement.CharactersParsed);
+                    var paramsGroup = match.Groups["Params"];
+                    Params = paramsGroup.Value.Trim();
+                    RemoveFirstCharactersOfMessage(paramsGroup.Length);
                 }
             }
 

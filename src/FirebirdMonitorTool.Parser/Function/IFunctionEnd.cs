@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using FirebirdMonitorTool.Common;
-using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Statement
+namespace FirebirdMonitorTool.Function
 {
-    public interface IStatementFinish : IStatement, ITransaction
+    public interface IFunctionEnd : IFunction
     {
         string Params { get; }
         IReadOnlyList<ITableCount> TableCounts { get; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace FirebirdMonitorTool.Common
@@ -13,7 +14,7 @@ namespace FirebirdMonitorTool.Common
             ELAPSED_TIME
         }
 
-        private static readonly string s_PlanSeparator = "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
+        private const string s_PlanSeparator = "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
 
         private static readonly Regex s_RegexNone =
             new Regex(
@@ -42,7 +43,7 @@ namespace FirebirdMonitorTool.Common
         public string Plan { get; private set; }
         public long? RecordsFetched { get; private set; }
         public TimeSpan? ElapsedTime { get; private set; }
-        public IReadOnlyList<string> Params { get; private set; }
+        public string Params { get; private set; }
         public int CharactersParsed { get; private set; }
 
         public bool Parse(Option option)
@@ -78,34 +79,17 @@ namespace FirebirdMonitorTool.Common
                 if (index >= 0)
                 {
                     //  With Plan
-                    Plan = Text.Substring(index + s_PlanSeparator.Length, Text.Length - (index + s_PlanSeparator.Length)).Trim();
+                    var split = EmptyLineSplitter.Split(Text.Substring(index + s_PlanSeparator.Length, Text.Length - (index + s_PlanSeparator.Length)).Trim(), 2).ToList();
                     Text = Text.Substring(0, index).TrimEnd();
-                    var parseParams = new ParseParams(Plan);
-                    if (parseParams.Parse())
-                    {
-                        Params = parseParams.Params;
-                    }
-                    if (Params.Count > 0)
-                    {
-                        // Re-evaluate Plan again
-                        var paramIndex = Plan.IndexOf(Params[0], StringComparison.InvariantCulture);
-                        Plan = Plan.Substring(0, paramIndex).TrimEnd();
-                    }
+                    Plan = split[0];
+                    Params = split.ElementAtOrDefault(1);
                 }
                 else
                 {
                     // No plan
-                    var parseParams = new ParseParams(Text);
-                    if (parseParams.Parse())
-                    {
-                        Params = parseParams.Params;
-                    }
-                    if (Params.Count > 0)
-                    {
-                        // Re-evaluate Text again
-                        var paramIndex = Text.IndexOf(Params[0], StringComparison.InvariantCulture);
-                        Text = Text.Substring(0, paramIndex).TrimEnd();
-                    }
+                    var split = EmptyLineSplitter.Split(Text, 2).ToList();
+                    Text = split[0];
+                    Params = split.ElementAtOrDefault(1);
                 }
             }
 

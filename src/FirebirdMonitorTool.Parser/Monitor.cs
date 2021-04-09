@@ -22,10 +22,6 @@ namespace FirebirdMonitorTool
 
         public void Process(string input)
         {
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return;
-            }
             lock (m_Locker)
             {
                 var rawCommand = RawCommand.TryMatch(input);
