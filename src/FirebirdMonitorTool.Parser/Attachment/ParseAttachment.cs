@@ -6,7 +6,7 @@ namespace FirebirdMonitorTool.Attachment
     {
         private static readonly Regex s_Regex =
             new Regex(
-                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s((?<RemoteProtocol>[A-Za-z0-9]{4,}):(?<RemoteAddress>.+?)?|<internal>)\)(\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+))?\s+(?=\(TRA_|Statement|\s*)",
+                @"^\s*(?<DatabaseName>.+)\s\(ATT_(?<ConnectionId>\d+),\s(?<User>.+?)(:(?<Role>.+))?,\s(?<Charset>.+),\s((?<RemoteProtocol>[A-Za-z0-9]{4,}):(?<RemoteAddress>.+?)?|<internal>)\)(\s+(?<RemoteProcessName>.+):(?<RemoteProcessId>\d+))?\s*",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         protected ParseAttachment(RawCommand rawCommand)

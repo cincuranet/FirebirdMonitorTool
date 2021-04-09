@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Trace
 {
-    internal sealed class ParseTraceStart : ParseTrace, ITraceEnd
+    internal sealed class ParseTraceStart : ParseTrace, ITraceStart
     {
         public ParseTraceStart(RawCommand rawCommand)
             : base(rawCommand)
