@@ -2,6 +2,7 @@
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Common;
 using FirebirdMonitorTool.Function;
+using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
 using FirebirdMonitorTool.Transaction;
 using FirebirdMonitorTool.Trigger;
@@ -9,218 +10,246 @@ using NUnit.Framework;
 
 namespace FirebirdMonitorTool.Tests
 {
-    [TestFixture]
     public class ParserTests
     {
-        [Test]
-        public void TraceInit()
+        public class Raw
         {
-            var header = "2021-03-31T19:47:24.2050 (3148:000000007ED40040) TRACE_INIT";
-            var message = @"	SESSION_1 IBE_31-3-2021 19:47:23";
-            var result = Parse<ITraceStart>(header, message);
-            Assert.AreEqual(1, result.SessionId);
-            Assert.AreEqual("IBE_31-3-2021 19:47:23", result.SessionName);
+            [Test]
+            public void Header()
+            {
+                var header = "2021-03-31T19:47:25.7120 (3148:0000000064148C40) EXECUTE_STATEMENT_START";
+                var command = RawCommand.TryMatch(header);
+                Assert.NotNull(command);
+                Assert.AreEqual(new DateTime(2021, 03, 31, 19, 47, 25, 712), command.TimeStamp);
+                Assert.AreEqual(3148, command.ServerProcessId);
+                Assert.AreEqual(1679068224, command.InternalTraceId);
+                Assert.AreEqual("EXECUTE_STATEMENT_START", command.Command);
+            }
         }
 
-        [Test]
-        public void TraceFinish()
+        public class Trace
         {
-            var header = "2021-03-31T19:47:24.3360 (3148:000000007ED41EC0) TRACE_FINI";
-            var message = @"	SESSION_1 IBE_31-3-2021 19:47:23";
-            var result = Parse<ITraceEnd>(header, message);
-            Assert.AreEqual(1, result.SessionId);
-            Assert.AreEqual("IBE_31-3-2021 19:47:23", result.SessionName);
+            [Test]
+            public void TraceInit()
+            {
+                var header = "2021-03-31T19:47:24.2050 (3148:000000007ED40040) TRACE_INIT";
+                var message = @"	SESSION_1 IBE_31-3-2021 19:47:23";
+                var result = Parse<ITraceStart>(header, message);
+                Assert.AreEqual(1, result.SessionId);
+                Assert.AreEqual("IBE_31-3-2021 19:47:23", result.SessionName);
+            }
+
+            [Test]
+            public void TraceFinish()
+            {
+                var header = "2021-03-31T19:47:24.3360 (3148:000000007ED41EC0) TRACE_FINI";
+                var message = @"	SESSION_1 IBE_31-3-2021 19:47:23";
+                var result = Parse<ITraceEnd>(header, message);
+                Assert.AreEqual(1, result.SessionId);
+                Assert.AreEqual("IBE_31-3-2021 19:47:23", result.SessionName);
+            }
         }
 
-        [Test]
-        public void AttachDatabase()
+        public class Attachment
         {
-            var header = "2021-03-31T19:47:24.2470 (3148:000000007ED41EC0) ATTACH_DATABASE";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480";
-            var result = Parse<IAttachmentStart>(header, message);
-            Assert.AreEqual(@"E:\DB\XXX\XXX.FDB", result.DatabaseName);
-            Assert.AreEqual(200039, result.ConnectionId);
-            Assert.AreEqual("CLIENT", result.User);
-            Assert.AreEqual("NONE", result.Role);
-            Assert.AreEqual("UTF8", result.CharacterSet);
-            Assert.AreEqual("TCPv4", result.RemoteProtocol);
-            Assert.AreEqual("127.0.0.1/49652", result.RemoteAddress);
-            Assert.AreEqual(@"E:\www\xxx.com\", result.RemoteProcessName);
-            Assert.AreEqual(12480, result.RemoteProcessId);
+            [Test]
+            public void AttachDatabase()
+            {
+                var header = "2021-03-31T19:47:24.2470 (3148:000000007ED41EC0) ATTACH_DATABASE";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480";
+                var result = Parse<IAttachmentStart>(header, message);
+                Assert.AreEqual(@"E:\DB\XXX\XXX.FDB", result.DatabaseName);
+                Assert.AreEqual(200039, result.ConnectionId);
+                Assert.AreEqual("CLIENT", result.User);
+                Assert.AreEqual("NONE", result.Role);
+                Assert.AreEqual("UTF8", result.CharacterSet);
+                Assert.AreEqual("TCPv4", result.RemoteProtocol);
+                Assert.AreEqual("127.0.0.1/49652", result.RemoteAddress);
+                Assert.AreEqual(@"E:\www\xxx.com\", result.RemoteProcessName);
+                Assert.AreEqual(12480, result.RemoteProcessId);
+            }
+
+            [Test]
+            public void DetachDatabase()
+            {
+                var header = "2021-03-31T19:47:24.5350 (3148:000000007ED41EC0) DETACH_DATABASE";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
+    E:\www\xxx.com\:12480";
+                var result = Parse<IAttachmentEnd>(header, message);
+                Assert.AreEqual(@"E:\DB\XXX\XXX.FDB", result.DatabaseName);
+                Assert.AreEqual(423062, result.ConnectionId);
+                Assert.AreEqual("CLIENT", result.User);
+                Assert.AreEqual("NONE", result.Role);
+                Assert.AreEqual("UTF8", result.CharacterSet);
+                Assert.AreEqual("TCPv4", result.RemoteProtocol);
+                Assert.AreEqual("127.0.0.1/49653", result.RemoteAddress);
+                Assert.AreEqual(@"E:\www\xxx.com\", result.RemoteProcessName);
+                Assert.AreEqual(12480, result.RemoteProcessId);
+            }
         }
 
-        [Test]
-        public void DetachDatabase()
+        public class Transaction
         {
-            var header = "2021-03-31T19:47:24.5350 (3148:000000007ED41EC0) DETACH_DATABASE";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
-	E:\www\xxx.com\:12480";
-            var result = Parse<IAttachmentEnd>(header, message);
-            Assert.AreEqual(@"E:\DB\XXX\XXX.FDB", result.DatabaseName);
-            Assert.AreEqual(423062, result.ConnectionId);
-            Assert.AreEqual("CLIENT", result.User);
-            Assert.AreEqual("NONE", result.Role);
-            Assert.AreEqual("UTF8", result.CharacterSet);
-            Assert.AreEqual("TCPv4", result.RemoteProtocol);
-            Assert.AreEqual("127.0.0.1/49653", result.RemoteAddress);
-            Assert.AreEqual(@"E:\www\xxx.com\", result.RemoteProcessName);
-            Assert.AreEqual(12480, result.RemoteProcessId);
-        }
+            [Test]
+            public void BeginTransaction()
+            {
+                var header = "2021-03-31T19:47:25.8310 (3148:000000007ED41EC0) START_TRANSACTION";
+                var message = @"	E:\DB\XXX.FDB (ATT_5555472, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49659)
+    E:\www\xxx.com\:20204
+        (TRA_16322451, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)";
+                var result = Parse<ITransactionStart>(header, message);
+                Assert.AreEqual(16322451, result.TransactionId);
+                Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
+                Assert.AreEqual(true, result.RecordVersion);
+                Assert.AreEqual(false, result.Wait);
+                Assert.AreEqual(null, result.WaitTime);
+                Assert.AreEqual(false, result.ReadOnly);
+            }
 
-        [Test]
-        public void BeginTransaction()
-        {
-            var header = "2021-03-31T19:47:25.8310 (3148:000000007ED41EC0) START_TRANSACTION";
-            var message = @"	E:\DB\XXX.FDB (ATT_5555472, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49659)
-	E:\www\xxx.com\:20204
-		(TRA_16322451, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)";
-            var result = Parse<ITransactionStart>(header, message);
-            Assert.AreEqual(16322451, result.TransactionId);
-            Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
-            Assert.AreEqual(true, result.RecordVersion);
-            Assert.AreEqual(false, result.Wait);
-            Assert.AreEqual(null, result.WaitTime);
-            Assert.AreEqual(false, result.ReadOnly);
-        }
-
-        [Test]
-        public void CommitTransaction()
-        {
-            var header = "2021-03-31T19:47:24.3340 (3148:000000007ED41EC0) COMMIT_TRANSACTION";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480
-		(TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void CommitTransaction()
+            {
+                var header = "2021-03-31T19:47:24.3340 (3148:000000007ED41EC0) COMMIT_TRANSACTION";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480
+        (TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
      19 ms, 5 write(s), 1 fetch(es), 1 mark(s)";
-            var result = Parse<ITransactionEnd>(header, message);
-            Assert.AreEqual(199233, result.TransactionId);
-            Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
-            Assert.AreEqual(true, result.RecordVersion);
-            Assert.AreEqual(false, result.Wait);
-            Assert.AreEqual(null, result.WaitTime);
-            Assert.AreEqual(false, result.ReadOnly);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(19), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(5, result.Writes);
-            Assert.AreEqual(1, result.Fetches);
-            Assert.AreEqual(1, result.Marks);
-        }
+                var result = Parse<ITransactionEnd>(header, message);
+                Assert.AreEqual(199233, result.TransactionId);
+                Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
+                Assert.AreEqual(true, result.RecordVersion);
+                Assert.AreEqual(false, result.Wait);
+                Assert.AreEqual(null, result.WaitTime);
+                Assert.AreEqual(false, result.ReadOnly);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(19), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(5, result.Writes);
+                Assert.AreEqual(1, result.Fetches);
+                Assert.AreEqual(1, result.Marks);
+            }
 
-        [Test]
-        public void RollbackTransaction()
-        {
-            var header = "2021-03-31T20:16:34.8720 (3148:00000001985311C0) ROLLBACK_TRANSACTION";
-            var message = @"	E:\DB\INGULKART\FAST.FDB (ATT_133776, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/50741)
-		(TRA_376968, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void RollbackTransaction()
+            {
+                var header = "2021-03-31T20:16:34.8720 (3148:00000001985311C0) ROLLBACK_TRANSACTION";
+                var message = @"	E:\DB\INGULKART\FAST.FDB (ATT_133776, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/50741)
+        (TRA_376968, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
       0 ms, 1 fetch(es), 1 mark(s)";
-            var result = Parse<ITransactionEnd>(header, message);
-            Assert.AreEqual(376968, result.TransactionId);
-            Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
-            Assert.AreEqual(true, result.RecordVersion);
-            Assert.AreEqual(false, result.Wait);
-            Assert.AreEqual(null, result.WaitTime);
-            Assert.AreEqual(false, result.ReadOnly);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(null, result.Writes);
-            Assert.AreEqual(1, result.Fetches);
-            Assert.AreEqual(1, result.Marks);
+                var result = Parse<ITransactionEnd>(header, message);
+                Assert.AreEqual(376968, result.TransactionId);
+                Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
+                Assert.AreEqual(true, result.RecordVersion);
+                Assert.AreEqual(false, result.Wait);
+                Assert.AreEqual(null, result.WaitTime);
+                Assert.AreEqual(false, result.ReadOnly);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(1, result.Fetches);
+                Assert.AreEqual(1, result.Marks);
+            }
         }
 
-        [Test]
-        public void TriggerStart()
+        public class Trigger
         {
-            var header = "2021-03-31T19:47:25.4230 (3148:000000007ED424C0) EXECUTE_TRIGGER_START";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_423063, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49656)
-	E:\www\xxx.com\:12480
-		(TRA_1264236, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
-	T_ND_ONLY_SYS_INIT_UPD FOR T_NODE (BEFORE UPDATE) ";
-            var result = Parse<ITriggerStart>(header, message);
-            Assert.AreEqual("T_ND_ONLY_SYS_INIT_UPD", result.TriggerName);
-            Assert.AreEqual("T_NODE", result.TableName);
-            Assert.AreEqual("BEFORE UPDATE", result.Action);
-        }
+            [Test]
+            public void TriggerStart()
+            {
+                var header = "2021-03-31T19:47:25.4230 (3148:000000007ED424C0) EXECUTE_TRIGGER_START";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_423063, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49656)
+    E:\www\xxx.com\:12480
+        (TRA_1264236, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+    T_ND_ONLY_SYS_INIT_UPD FOR T_NODE (BEFORE UPDATE) ";
+                var result = Parse<ITriggerStart>(header, message);
+                Assert.AreEqual("T_ND_ONLY_SYS_INIT_UPD", result.TriggerName);
+                Assert.AreEqual("T_NODE", result.TableName);
+                Assert.AreEqual("BEFORE UPDATE", result.Action);
+            }
 
-        [Test]
-        public void TriggerFinish()
-        {
-            var header = "2021-03-31T19:47:25.4230 (3148:000000007ED424C0) EXECUTE_TRIGGER_FINISH";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_423063, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49656)
-	E:\www\xxx.com\:12480
-		(TRA_1264236, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
-	T_ND_ONLY_SYS_INIT_UPD FOR T_NODE (BEFORE UPDATE) 
+            [Test]
+            public void TriggerFinish()
+            {
+                var header = "2021-03-31T19:47:25.4230 (3148:000000007ED424C0) EXECUTE_TRIGGER_FINISH";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_423063, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49656)
+    E:\www\xxx.com\:12480
+        (TRA_1264236, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+    T_ND_ONLY_SYS_INIT_UPD FOR T_NODE (BEFORE UPDATE) 
       2 ms      ";
-            var result = Parse<ITriggerEnd>(header, message);
-            Assert.AreEqual("T_ND_ONLY_SYS_INIT_UPD", result.TriggerName);
-            Assert.AreEqual("T_NODE", result.TableName);
-            Assert.AreEqual("BEFORE UPDATE", result.Action);
-            Assert.AreEqual(null, result.TableCounts);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(2), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(null, result.Writes);
-            Assert.AreEqual(null, result.Fetches);
-            Assert.AreEqual(null, result.Marks);
-        }
+                var result = Parse<ITriggerEnd>(header, message);
+                Assert.AreEqual("T_ND_ONLY_SYS_INIT_UPD", result.TriggerName);
+                Assert.AreEqual("T_NODE", result.TableName);
+                Assert.AreEqual("BEFORE UPDATE", result.Action);
+                Assert.AreEqual(null, result.TableCounts);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(2), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(null, result.Fetches);
+                Assert.AreEqual(null, result.Marks);
+            }
 
-        [Test]
-        public void DatabaseTriggerStart()
-        {
-            var header = "2021-03-31T19:47:24.5300 (3148:000000007ED41EC0) EXECUTE_TRIGGER_START";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
-	E:\www\xxx.com\:12480
-		(TRA_1264233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
-	DBCOMMITRANSACTION (ON TRANSACTION_COMMIT) ";
-            var result = Parse<ITriggerStart>(header, message);
-            Assert.AreEqual("DBCOMMITRANSACTION", result.TriggerName);
-            Assert.AreEqual(null, result.TableName);
-            Assert.AreEqual("ON TRANSACTION_COMMIT", result.Action);
-        }
+            [Test]
+            public void DatabaseTriggerStart()
+            {
+                var header = "2021-03-31T19:47:24.5300 (3148:000000007ED41EC0) EXECUTE_TRIGGER_START";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
+    E:\www\xxx.com\:12480
+        (TRA_1264233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
+    DBCOMMITRANSACTION (ON TRANSACTION_COMMIT) ";
+                var result = Parse<ITriggerStart>(header, message);
+                Assert.AreEqual("DBCOMMITRANSACTION", result.TriggerName);
+                Assert.AreEqual(null, result.TableName);
+                Assert.AreEqual("ON TRANSACTION_COMMIT", result.Action);
+            }
 
-        [Test]
-        public void DatabaseTriggerFinish()
-        {
-            var header = "2021-03-31T19:47:24.5310 (3148:000000007ED41EC0) EXECUTE_TRIGGER_FINISH";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
-	E:\www\xxx.com\:12480
-		(TRA_1264233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
-	DBCOMMITRANSACTION (ON TRANSACTION_COMMIT) 
+            [Test]
+            public void DatabaseTriggerFinish()
+            {
+                var header = "2021-03-31T19:47:24.5310 (3148:000000007ED41EC0) EXECUTE_TRIGGER_FINISH";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_423062, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49653)
+    E:\www\xxx.com\:12480
+        (TRA_1264233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
+    DBCOMMITRANSACTION (ON TRANSACTION_COMMIT) 
       1 ms";
-            var result = Parse<ITriggerEnd>(header, message);
-            Assert.AreEqual("DBCOMMITRANSACTION", result.TriggerName);
-            Assert.AreEqual(null, result.TableName);
-            Assert.AreEqual("ON TRANSACTION_COMMIT", result.Action);
-            Assert.AreEqual(null, result.TableCounts);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(1), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(null, result.Writes);
-            Assert.AreEqual(null, result.Fetches);
-            Assert.AreEqual(null, result.Marks);
+                var result = Parse<ITriggerEnd>(header, message);
+                Assert.AreEqual("DBCOMMITRANSACTION", result.TriggerName);
+                Assert.AreEqual(null, result.TableName);
+                Assert.AreEqual("ON TRANSACTION_COMMIT", result.Action);
+                Assert.AreEqual(null, result.TableCounts);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(1), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(null, result.Fetches);
+                Assert.AreEqual(null, result.Marks);
+            }
         }
 
-        [Test]
-        public void FunctionStart()
+        public class Function
         {
-            var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_START";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480
-		(TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void FunctionStart()
+            {
+                var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_START";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480
+        (TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
 
 Function INTERNALS.CS_VERSION_START:
 param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
 param1 = bigint, ""199233""";
-            var result = Parse<IFunctionStart>(header, message);
-            Assert.AreEqual("INTERNALS.CS_VERSION_START", result.FunctionName);
-            Assert.AreEqual(@"param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
+                var result = Parse<IFunctionStart>(header, message);
+                Assert.AreEqual("INTERNALS.CS_VERSION_START", result.FunctionName);
+                Assert.AreEqual(@"param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
 param1 = bigint, ""199233""", result.Params);
-        }
+            }
 
-        [Test]
-        public void FunctionFinish()
-        {
-            var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_FINISH";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480
-		(TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void FunctionFinish()
+            {
+                var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_FINISH";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480
+        (TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
 
 Function INTERNALS.CS_VERSION_START:
 param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
@@ -230,63 +259,290 @@ returns:
 param0 = bigint, ""13261594705785000""
 
       0 ms";
-            var result = Parse<IFunctionEnd>(header, message);
-            Assert.AreEqual("INTERNALS.CS_VERSION_START", result.FunctionName);
-            Assert.AreEqual(@"param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
+                var result = Parse<IFunctionEnd>(header, message);
+                Assert.AreEqual("INTERNALS.CS_VERSION_START", result.FunctionName);
+                Assert.AreEqual(@"param0 = varchar(1024), ""E:\DB\XXX\XXX.FDB""
 param1 = bigint, ""199233""
 
 returns:
 param0 = bigint, ""13261594705785000""", result.Params);
-            Assert.AreEqual(null, result.TableCounts);
-            Assert.AreEqual(null, result.RecordsFetched);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(null, result.Writes);
-            Assert.AreEqual(null, result.Fetches);
-            Assert.AreEqual(null, result.Marks);
-        }
+                Assert.AreEqual(null, result.TableCounts);
+                Assert.AreEqual(null, result.RecordsFetched);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(null, result.Fetches);
+                Assert.AreEqual(null, result.Marks);
+            }
 
-        [Test]
-        public void FunctionStartNoInput()
-        {
-            var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_START";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480
-		(TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void FunctionStartNoInput()
+            {
+                var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_START";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480
+        (TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
 
 Function INTERNALS.VERSION_START:";
-            var result = Parse<IFunctionStart>(header, message);
-            Assert.AreEqual("INTERNALS.VERSION_START", result.FunctionName);
-            Assert.AreEqual(null, result.Params);
-        }
+                var result = Parse<IFunctionStart>(header, message);
+                Assert.AreEqual("INTERNALS.VERSION_START", result.FunctionName);
+                Assert.AreEqual(null, result.Params);
+            }
 
-        [Test]
-        public void FunctionFinishNoInput()
-        {
-            var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_FINISH";
-            var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
-	E:\www\xxx.com\:12480
-		(TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+            [Test]
+            public void FunctionFinishNoInput()
+            {
+                var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_FINISH";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_200039, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49652)
+    E:\www\xxx.com\:12480
+        (TRA_199233, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
 
 Function INTERNALS.VERSION_START:
 returns:
 param0 = bigint, ""13261594705785000""
 
       1 ms";
-            var result = Parse<IFunctionEnd>(header, message);
-            Assert.AreEqual("INTERNALS.VERSION_START", result.FunctionName);
-            Assert.AreEqual(@"returns:
+                var result = Parse<IFunctionEnd>(header, message);
+                Assert.AreEqual("INTERNALS.VERSION_START", result.FunctionName);
+                Assert.AreEqual(@"returns:
 param0 = bigint, ""13261594705785000""", result.Params);
-            Assert.AreEqual(null, result.TableCounts);
-            Assert.AreEqual(null, result.RecordsFetched);
-            Assert.AreEqual(TimeSpan.FromMilliseconds(1), result.ElapsedTime);
-            Assert.AreEqual(null, result.Reads);
-            Assert.AreEqual(null, result.Writes);
-            Assert.AreEqual(null, result.Fetches);
-            Assert.AreEqual(null, result.Marks);
+                Assert.AreEqual(null, result.TableCounts);
+                Assert.AreEqual(null, result.RecordsFetched);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(1), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(null, result.Fetches);
+                Assert.AreEqual(null, result.Marks);
+            }
         }
 
-        T Parse<T>(string header, string message) where T : ICommand
+        public class Statement
+        {
+            [Test]
+            public void StatementPrepare()
+            {
+                var header = "2021-03-31T19:47:25.6070 (3148:000000007ED424C0) PREPARE_STATEMENT";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_476402, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49657)
+    E:\www\xxx.com\:12480
+        (TRA_1428662, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
+
+Statement 503:
+-------------------------------------------------------------------------------
+select distinct version from sync_w_meta_all_version order by version asc
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN SORT (SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_CONDITION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_META_2_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ADDRESS NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ADDRESS_CHECK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_APPLICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_ADDRESS_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_BOUNCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CAMPAIGN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CONDITION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CONDITION_PARAMETER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_NOTIFICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_NOTIFICATION_PARAM NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_PARAMETER_2_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_PARAMETER_SETTINGS NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_SETUP_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TARGET NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TARGET_2_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE_2_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE_PARAMETER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_UNSUBSCRIBE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMATION_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_2_BILL_PAYMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_LINE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_PAYMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_PAYMENT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BUTTON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CAREER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CAREER_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CITY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CLOSE_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COMMUNICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTRY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DAY_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_2_APPLICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_META_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DRAWER_MUTATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DRAWER_MUTATION_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FILE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_PLAN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_PLAN_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_ZONE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_GAME NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_IMAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_IMAGE_FILE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_KEYBOARD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_LANGUAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MESSAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MESSAGE_READ NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_ACTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_ACTION_2_RNO2RNP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_DATA NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_DATA_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_HISTORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_META_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NODE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOTIFICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOTIFICATION_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOT_META_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NUMBERING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NUMBERING_RECYCLEBIN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_2_RENTAL_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_BOWLING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_RACING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_SHOOTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAYMENT_POLICY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAY_METHOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAY_METHOD_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERIOD_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_CAREER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_CAREER_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_FEEDBACK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_LINK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_LINK_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_SOCIAL_NETWORK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PIT_LANE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PLAYLIST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PLAYLIST_2_SCENE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_POOLED_PARTICIPANT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_CATEGORY_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRINT_ROUTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJIM2PRJK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_GROUP_2_PRJ_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRODUCT_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_2_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_ENTRY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_2_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT_2_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT_2_PRODUCT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_STOCK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_2_RNO2RNP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_INFO NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_INFO_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_LOG_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_OPTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_OPTION_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PRODUCT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_SCHEDULE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY_PARAM NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_DEPOSIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_TAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_VOUCHER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RACE_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REGION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_KIND_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_2_RENTAL_PART NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_PART NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_PART_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META_FILE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_2_RESOURCE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_2_WEB_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_DEF_SESSIONSETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RNO2RNP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_COLUMN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_COLUMN_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCORE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCORE_POINT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SECURITY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SECURITY_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SERIAL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_SETUP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SETTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SETTING_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHOW NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHOW_2_PLAYLIST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHUTDOWN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SITE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_STOCK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_STYLE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_2_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_2_PERSON_ANSWER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_ANSWER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE_2_SURVEY_QUESTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_QUESTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SYSTEM_SESSION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAG_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TARGET NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAX NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAX_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_EVENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_LOOP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_TRAP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSLATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSLATION_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSPONDER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSPONDER_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_UNIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_PASSWORD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_2_BILL_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_COST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_2_VCMP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WEB_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WEEK_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WORK_SHIFT NATURAL)
+     22 ms";
+                var result = Parse<IStatementPrepare>(header, message);
+                Assert.AreEqual(503, result.StatementId);
+                Assert.AreEqual("select distinct version from sync_w_meta_all_version order by version asc", result.Text);
+                Assert.AreEqual("PLAN SORT (SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_CONDITION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT_META_2_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ADDRESS NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ADDRESS_CHECK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_APPLICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_ADDRESS_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_BOUNCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CAMPAIGN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CONDITION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_CONDITION_PARAMETER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_NOTIFICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_NOTIFICATION_PARAM NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_PARAMETER_2_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_PARAMETER_SETTINGS NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_SETUP_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TARGET NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TARGET_2_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE_2_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_TEMPLATE_PARAMETER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMAIL_UNSUBSCRIBE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_AUTOMATION_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_2_BILL_PAYMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_LINE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_PAYMENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_PAYMENT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BILL_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_BUTTON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CAREER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CAREER_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CITY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_CLOSE_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COMMUNICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTER_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_COUNTRY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DAY_TEMPLATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_KIND_2_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEPOSIT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_2_APPLICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DEVICE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DISCOUNT_META_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DRAWER_MUTATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_DRAWER_MUTATION_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FILE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_PLAN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_PLAN_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_FLOOR_ZONE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_GAME NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_IMAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_IMAGE_FILE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_KEYBOARD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_LANGUAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MESSAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_MESSAGE_READ NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_ACTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_ACTION_2_RNO2RNP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_DATA NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_DATA_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_HISTORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_METRIC_META_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NODE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOTIFICATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOTIFICATION_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NOT_META_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NUMBERING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_NUMBERING_RECYCLEBIN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAGE_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_2_RENTAL_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_BOWLING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_RACING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_SCORE_SHOOTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PARTICIPANT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAYMENT_POLICY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAY_METHOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PAY_METHOD_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERIOD_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_CAREER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_CAREER_LEVEL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_FEEDBACK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_LINK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_LINK_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_SOCIAL_NETWORK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PERSON_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PIT_LANE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PLAYLIST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PLAYLIST_2_SCENE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_POOLED_PARTICIPANT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_CATEGORY_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRICE_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRINT_ROUTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJIM2PRJK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_GROUP_2_PRJ_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRJ_PERSON_2_PRJ_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_PRODUCT_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_2_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_ENTRY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_2_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_GROUP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT_2_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LIMIT_2_PRODUCT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_STOCK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PRODUCT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_2_RNO2RNP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_INFO NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_INFO_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_LOG_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_OPTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_OPTION_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PERSON_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PRODUCT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_PRODUCT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_SCHEDULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_SCHEDULE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_PROJECT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_QUERY_PARAM NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_DEPOSIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON_2_MEMBERSHIP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_PERSON_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_TAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_Q_VOUCHER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RACE_CATEGORY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REGION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_KIND_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_2_RENTAL_PART NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_OBJECT_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_PART NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RENTAL_PART_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META_2_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_REPORT_META_FILE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_2_RESOURCE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_2_WEB_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_DEF_SESSIONSETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_STATE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RESOURCE_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RNO2RNP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_RULE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_COLUMN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_COLUMN_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCENE_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCHEDULE_SETUP_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCORE_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SCORE_POINT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SECURITY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SECURITY_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SERIAL NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_SETUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_SETUP_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SESSION_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SETTING NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SETTING_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHOW NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHOW_2_PLAYLIST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SHUTDOWN NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SITE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_STOCK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_STYLE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_2_PERSON NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_2_PERSON_ANSWER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_ANSWER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_PAGE_2_SURVEY_QUESTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SURVEY_QUESTION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_SYSTEM_SESSION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAG_LOG NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TARGET NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAX NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TAX_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_EVENT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_LOOP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_TRAP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRACK_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSLATION NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSLATION_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSPONDER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_TRANSPONDER_KIND NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_UNIT NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_2_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_GROUP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_PASSWORD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_USER_XR NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_2_BILL_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_COST NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_2_PERIOD NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_2_VCMP NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_LINE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_VOUCHER_META_PICTURE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WEB_PAGE NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WEEK_DAY NATURAL, SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_2 W_WORK_SHIFT NATURAL)", result.Plan);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(22), result.ElapsedTime);
+            }
+
+            [Test]
+            public void StatementStart()
+            {
+                var header = "2021-03-31T19:47:25.6190 (3148:000000007ED40040) EXECUTE_STATEMENT_START";
+                var message = @"	C:\XXX\FIREBIRD\SECURITY3.FDB (ATT_141966, SYSDBA:NONE, NONE, <internal>)
+        (TRA_140581, READ_COMMITTED | REC_VERSION | WAIT | READ_ONLY)
+
+Statement 25:
+-------------------------------------------------------------------------------
+SELECT PLG$VERIFIER, PLG$SALT FROM PLG$SRP WHERE PLG$USER_NAME = ? AND PLG$ACTIVE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (PLG$SRP INDEX (RDB$PRIMARY2))
+
+param0 = varchar(93), ""CLIENT""";
+                var result = Parse<IStatementStart>(header, message);
+                Assert.AreEqual(25, result.StatementId);
+                Assert.AreEqual("SELECT PLG$VERIFIER, PLG$SALT FROM PLG$SRP WHERE PLG$USER_NAME = ? AND PLG$ACTIVE", result.Text);
+                Assert.AreEqual("PLAN (PLG$SRP INDEX (RDB$PRIMARY2))", result.Plan);
+                Assert.AreEqual(@"param0 = varchar(93), ""CLIENT""", result.Params);
+            }
+
+            [Test]
+            public void StatementStartNoParams()
+            {
+                var header = "2021-03-31T19:47:24.6870 (3148:000000007ED41EC0) EXECUTE_STATEMENT_START";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_476401, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49654)
+    E:\www\xxx.com\:12480
+        (TRA_1428659, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
+
+Statement 459:
+-------------------------------------------------------------------------------
+select f_fb_product_version from t_funboo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_FUNBOO NATURAL)";
+                var result = Parse<IStatementStart>(header, message);
+                Assert.AreEqual(459, result.StatementId);
+                Assert.AreEqual("select f_fb_product_version from t_funboo", result.Text);
+                Assert.AreEqual("PLAN (T_FUNBOO NATURAL)", result.Plan);
+                Assert.AreEqual(null, result.Params);
+            }
+
+            [Test]
+            public void InternalAttachment()
+            {
+                var header = "2021-03-31T19:47:25.6190 (3148:000000007ED40040) EXECUTE_STATEMENT_START";
+                var message = @"	C:\FAST\FIREBIRD\SECURITY3.FDB (ATT_141966, SYSDBA:NONE, NONE, <internal>)
+        (TRA_140581, READ_COMMITTED | REC_VERSION | WAIT | READ_ONLY)
+
+Statement 25:
+-------------------------------------------------------------------------------
+SELECT PLG$VERIFIER, PLG$SALT FROM PLG$SRP WHERE PLG$USER_NAME = ? AND PLG$ACTIVE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (PLG$SRP INDEX (RDB$PRIMARY2))
+
+param0 = varchar(93), ""CLIENT""";
+                var result = Parse<IStatementStart>(header, message);
+                Assert.AreEqual(@"C:\FAST\FIREBIRD\SECURITY3.FDB", result.DatabaseName);
+                Assert.AreEqual(141966, result.ConnectionId);
+                Assert.AreEqual("SYSDBA", result.User);
+                Assert.AreEqual("NONE", result.Role);
+                Assert.AreEqual("NONE", result.CharacterSet);
+                Assert.AreEqual("<internal>", result.RemoteProtocol);
+                Assert.AreEqual(null, result.RemoteAddress);
+                Assert.AreEqual(null, result.RemoteProcessName);
+                Assert.AreEqual(null, result.RemoteProcessId);
+            }
+
+            [Test]
+            public void FreeStatement()
+            {
+                var header = "2021-03-31T19:47:25.7010 (3148:000000007ED424C0) FREE_STATEMENT";
+                var message = @"	E:\DB\XXX.FDB (ATT_5555471, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49658)
+    E:\www\xxx.com\:20204
+
+Statement 28014315:
+-------------------------------------------------------------------------------
+SELECT ""T_CLIENT_IP"".""F_CI_ID"" AS ""Id"", ""T_CLIENT_IP"".""F_CL_ID"" AS ""ClientId"", ""T_CLIENT_IP"".""F_CI_DATE"" AS ""Date"", ""T_CLIENT_IP"".""F_CI_IP"" AS ""Ip"" FROM ""T_CLIENT_IP"" WHERE ( ""T_CLIENT_IP"".""F_CL_ID"" = ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_CLIENT_IP INDEX (FK_T_CL_IP_CL))";
+                var result = Parse<IStatementFree>(header, message);
+                Assert.AreEqual(28014315, result.StatementId);
+                Assert.AreEqual(@"SELECT ""T_CLIENT_IP"".""F_CI_ID"" AS ""Id"", ""T_CLIENT_IP"".""F_CL_ID"" AS ""ClientId"", ""T_CLIENT_IP"".""F_CI_DATE"" AS ""Date"", ""T_CLIENT_IP"".""F_CI_IP"" AS ""Ip"" FROM ""T_CLIENT_IP"" WHERE ( ""T_CLIENT_IP"".""F_CL_ID"" = ?)", result.Text);
+                Assert.AreEqual("PLAN (T_CLIENT_IP INDEX (FK_T_CL_IP_CL))", result.Plan);
+            }
+
+            [Test]
+            public void CloseCursor()
+            {
+                var header = "2021-03-31T19:47:25.7090 (3148:000000007ED41EC0) CLOSE_CURSOR";
+                var message = @"	E:\DB\XXX.FDB (ATT_5555472, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49659)
+    E:\www\xxx.com\:20204
+
+Statement 28014316:
+-------------------------------------------------------------------------------
+SELECT ""T_CLIENT_IP"".""F_CI_ID"" AS ""Id"", ""T_CLIENT_IP"".""F_CL_ID"" AS ""ClientId"", ""T_CLIENT_IP"".""F_CI_DATE"" AS ""Date"", ""T_CLIENT_IP"".""F_CI_IP"" AS ""Ip"" FROM ""T_CLIENT_IP"" WHERE ( ""T_CLIENT_IP"".""F_CL_ID"" = ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_CLIENT_IP INDEX (FK_T_CL_IP_CL))";
+                var result = Parse<IStatementClose>(header, message);
+                Assert.AreEqual(28014316, result.StatementId);
+                Assert.AreEqual(@"SELECT ""T_CLIENT_IP"".""F_CI_ID"" AS ""Id"", ""T_CLIENT_IP"".""F_CL_ID"" AS ""ClientId"", ""T_CLIENT_IP"".""F_CI_DATE"" AS ""Date"", ""T_CLIENT_IP"".""F_CI_IP"" AS ""Ip"" FROM ""T_CLIENT_IP"" WHERE ( ""T_CLIENT_IP"".""F_CL_ID"" = ?)", result.Text);
+                Assert.AreEqual("PLAN (T_CLIENT_IP INDEX (FK_T_CL_IP_CL))", result.Plan);
+            }
+
+            [Test]
+            public void ExecuteStatementFinish()
+            {
+                var header = "2021-03-31T19:47:27.0580 (3148:000000007ED424C0) EXECUTE_STATEMENT_FINISH";
+                var message = @"	E:\DB\XXX.FDB (ATT_5555477, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49680)
+    E:\www\xxx.com\:20204
+        (TRA_16322454, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+Statement 28014376:
+-------------------------------------------------------------------------------
+SELECT FIRST 250 ""T_ADDRESS_CONFIRMATION"".""F_ADC_ADDRESS"" AS ""Address"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_ADDRESS_TYPE"" AS ""AddressType"", ""T_ADDRESS_CONFIRMATION"".""F_CL_ID"" AS ""ClientId"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_CREATED_UTC"" AS ""CreatedUtc"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_ID"" AS ""Id"" FROM ""T_ADDRESS_CONFIRMATION"" WHERE ( ""T_ADDRESS_CONFIRMATION"".""F_CL_ID"" = ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_ADDRESS_CONFIRMATION INDEX (FK_ADC_CL_ID))
+
+param0 = bigint, ""8208866""
+
+3 records fetched
+      11 ms, 2 fetch(es)";
+                var result = Parse<IStatementFinish>(header, message);
+                Assert.AreEqual(28014376, result.StatementId);
+                Assert.AreEqual(@"SELECT FIRST 250 ""T_ADDRESS_CONFIRMATION"".""F_ADC_ADDRESS"" AS ""Address"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_ADDRESS_TYPE"" AS ""AddressType"", ""T_ADDRESS_CONFIRMATION"".""F_CL_ID"" AS ""ClientId"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_CREATED_UTC"" AS ""CreatedUtc"", ""T_ADDRESS_CONFIRMATION"".""F_ADC_ID"" AS ""Id"" FROM ""T_ADDRESS_CONFIRMATION"" WHERE ( ""T_ADDRESS_CONFIRMATION"".""F_CL_ID"" = ?)", result.Text);
+                Assert.AreEqual("PLAN (T_ADDRESS_CONFIRMATION INDEX (FK_ADC_CL_ID))", result.Plan);
+                Assert.AreEqual(@"param0 = bigint, ""8208866""", result.Params);
+                Assert.AreEqual(3, result.RecordsFetched);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(11), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(2, result.Fetches);
+                Assert.AreEqual(null, result.Marks);
+                Assert.AreEqual(null, result.TableCounts);
+            }
+
+            [Test]
+            public void ExecuteStatementFinishWithTableCounts()
+            {
+                var header = "2021-03-31T19:47:27.2050 (3148:000000007ED41EC0) EXECUTE_STATEMENT_FINISH";
+                var message = @"	E:\DB\XXX.FDB (ATT_5555478, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49683)
+    E:\www\xxx.com\:20204
+        (TRA_16322458, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+Statement 28014406:
+-------------------------------------------------------------------------------
+UPDATE ""T_CLIENT_HEARTBEAT"" SET ""F_CLH_LAST""=? WHERE ( ""T_CLIENT_HEARTBEAT"".""F_CLH_ID"" = ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_CLIENT_HEARTBEAT INDEX (PK_T_CLIENT_HEARTBEAT))
+
+param0 = timestamp, ""2021-03-31T17:47:25.8012""
+param1 = bigint, ""9084653""
+
+0 records fetched
+      0 ms, 35 fetch(es), 3 mark(s)
+
+Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge
+***************************************************************************************************************
+RDB$INDICES                                       7                                                            
+RDB$RELATION_CONSTRAINTS                          1                                                            
+T_CLIENT_HEARTBEAT                                1         1                                                  ";
+                var result = Parse<IStatementFinish>(header, message);
+                Assert.AreEqual(28014406, result.StatementId);
+                Assert.AreEqual(@"UPDATE ""T_CLIENT_HEARTBEAT"" SET ""F_CLH_LAST""=? WHERE ( ""T_CLIENT_HEARTBEAT"".""F_CLH_ID"" = ?)", result.Text);
+                Assert.AreEqual("PLAN (T_CLIENT_HEARTBEAT INDEX (PK_T_CLIENT_HEARTBEAT))", result.Plan);
+                Assert.AreEqual(@"param0 = timestamp, ""2021-03-31T17:47:25.8012""
+param1 = bigint, ""9084653""", result.Params);
+                Assert.AreEqual(0, result.RecordsFetched);
+                Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+                Assert.AreEqual(null, result.Reads);
+                Assert.AreEqual(null, result.Writes);
+                Assert.AreEqual(35, result.Fetches);
+                Assert.AreEqual(3, result.Marks);
+                Assert.AreEqual(3, result.TableCounts.Count);
+                Assert.AreEqual("RDB$INDICES", result.TableCounts[0].Name);
+                Assert.AreEqual(null, result.TableCounts[0].Natural);
+                Assert.AreEqual(7, result.TableCounts[0].Index);
+                Assert.AreEqual(null, result.TableCounts[0].Update);
+                Assert.AreEqual(null, result.TableCounts[0].Insert);
+                Assert.AreEqual(null, result.TableCounts[0].Delete);
+                Assert.AreEqual(null, result.TableCounts[0].Backout);
+                Assert.AreEqual(null, result.TableCounts[0].Purge);
+                Assert.AreEqual(null, result.TableCounts[0].Expunge);
+                Assert.AreEqual("RDB$RELATION_CONSTRAINTS", result.TableCounts[1].Name);
+                Assert.AreEqual(null, result.TableCounts[1].Natural);
+                Assert.AreEqual(1, result.TableCounts[1].Index);
+                Assert.AreEqual(null, result.TableCounts[1].Update);
+                Assert.AreEqual(null, result.TableCounts[1].Insert);
+                Assert.AreEqual(null, result.TableCounts[1].Delete);
+                Assert.AreEqual(null, result.TableCounts[1].Backout);
+                Assert.AreEqual(null, result.TableCounts[1].Purge);
+                Assert.AreEqual(null, result.TableCounts[1].Expunge);
+                Assert.AreEqual("T_CLIENT_HEARTBEAT", result.TableCounts[2].Name);
+                Assert.AreEqual(null, result.TableCounts[2].Natural);
+                Assert.AreEqual(1, result.TableCounts[2].Index);
+                Assert.AreEqual(1, result.TableCounts[2].Update);
+                Assert.AreEqual(null, result.TableCounts[2].Insert);
+                Assert.AreEqual(null, result.TableCounts[2].Delete);
+                Assert.AreEqual(null, result.TableCounts[2].Backout);
+                Assert.AreEqual(null, result.TableCounts[2].Purge);
+                Assert.AreEqual(null, result.TableCounts[2].Expunge);
+            }
+        }
+
+        static T Parse<T>(string header, string message) where T : ICommand
         {
             var command = RawCommand.TryMatch(header);
             command.TraceMessage = message;

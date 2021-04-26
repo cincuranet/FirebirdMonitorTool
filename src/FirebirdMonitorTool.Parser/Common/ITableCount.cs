@@ -2,14 +2,14 @@
 {
     public interface ITableCount
     {
-        long? Expunge { get; }
-        long? Purge { get; }
-        long? Backout { get; }
-        long? Delete { get; }
-        long? Insert { get; }
-        long? Update { get; }
-        long? Index { get; }
-        long? Natural { get; }
         string Name { get; }
+        long? Natural { get; }
+        long? Index { get; }
+        long? Update { get; }
+        long? Insert { get; }
+        long? Delete { get; }
+        long? Backout { get; }
+        long? Purge { get; }
+        long? Expunge { get; }
     }
 }

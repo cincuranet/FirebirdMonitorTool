@@ -4,10 +4,9 @@ using NUnit.Framework;
 
 namespace FirebirdMonitorTool.Tests
 {
-    [TestFixture]
     public class MonitorTests
     {
-        [Test]
+        [Test, Explicit]
         public void TraceFile()
         {
             var m = new Monitor();

@@ -15,13 +15,13 @@ namespace FirebirdMonitorTool.Statement
         public string Text { get; private set; }
         public string Plan { get; private set; }
         public string Params { get; private set; }
-        public IReadOnlyList<ITableCount> TableCounts { get; private set; }
         public long? RecordsFetched { get; private set; }
         public TimeSpan ElapsedTime { get; private set; }
         public long? Reads { get; private set; }
         public long? Writes { get; private set; }
         public long? Fetches { get; private set; }
         public long? Marks { get; private set; }
+        public IReadOnlyList<ITableCount> TableCounts { get; private set; }
 
         public override bool Parse()
         {
