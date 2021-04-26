@@ -1,7 +1,9 @@
 using System;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Context;
+using FirebirdMonitorTool.Error;
 using FirebirdMonitorTool.Function;
+using FirebirdMonitorTool.Procedure;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
 using FirebirdMonitorTool.Transaction;
@@ -116,16 +118,14 @@ namespace FirebirdMonitorTool
                 || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_START"))
             {
                 // see "TracePluginImpl::log_event_proc_execute" for magic strings
-                //return HandleParsing(new ParseProcedureStart(rawCommand));
-                return null;
+                return HandleParsing(new ParseProcedureStart(rawCommand));
             }
             else if (IsCommand(rawCommand, "EXECUTE_PROCEDURE_FINISH")
                 || IsCommand(rawCommand, "FAILED EXECUTE_PROCEDURE_FINISH")
                 || IsCommand(rawCommand, "UNAUTHORIZED EXECUTE_PROCEDURE_FINISH"))
             {
                 // see "TracePluginImpl::log_event_proc_execute" for magic strings
-                //return HandleParsing(new ParseProcedureEnd(rawCommand));
-                return null;
+                return HandleParsing(new ParseProcedureEnd(rawCommand));
             }
             else if (IsCommand(rawCommand, "EXECUTE_FUNCTION_START")
                 || IsCommand(rawCommand, "FAILED EXECUTE_FUNCTION_START")

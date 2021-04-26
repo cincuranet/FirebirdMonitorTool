@@ -1,23 +1,21 @@
 ﻿using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Context
+namespace FirebirdMonitorTool.Procedure
 {
-    internal sealed class ParseSetContext : ParseTransaction, ISetContext
+    internal abstract class ParseProcedure : ParseTransaction, IProcedure
     {
         private static readonly Regex s_Regex =
             new Regex(
-                @"^\s*\[(?<Namespace>.+)\]\s(?<Variable>.+) = (?<Value>.+)",
+                @"^\s*Procedure (?<ProcedureName>.+):",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        public ParseSetContext(RawCommand rawCommand)
+        protected ParseProcedure(RawCommand rawCommand)
             : base(rawCommand)
         {
         }
 
-        public string Namespace { get; private set; }
-        public string VariableName { get; private set; }
-        public string Value { get; private set; }
+        public string ProcedureName { get; private set; }
 
         public override bool Parse()
         {
@@ -29,9 +27,8 @@ namespace FirebirdMonitorTool.Context
                 result = match.Success;
                 if (result)
                 {
-                    Namespace = match.Groups["Namespace"].Value;
-                    VariableName = match.Groups["Variable"].Value;
-                    Value = match.Groups["Value"].Value;
+                    ProcedureName = match.Groups["ProcedureName"].Value;
+                    RemoveFirstCharactersOfMessage(match.Groups[0].Length);
                 }
             }
 

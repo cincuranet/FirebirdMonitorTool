@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using FirebirdMonitorTool.Common;
-using FirebirdMonitorTool.Transaction;
 
-namespace FirebirdMonitorTool.Statement
+namespace FirebirdMonitorTool.Procedure
 {
-    public interface IStatementFinish : IStatement, ITransaction
+    public interface IProcedureEnd : IProcedure
     {
         string Params { get; }
         long? RecordsFetched { get; }

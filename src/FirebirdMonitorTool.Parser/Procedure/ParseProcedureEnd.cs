@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Common;
 
-namespace FirebirdMonitorTool.Function
+namespace FirebirdMonitorTool.Procedure
 {
-    internal sealed class ParseFunctionEnd : ParseFunction, IFunctionEnd
+    internal sealed class ParseProcedureEnd : ParseProcedure, IProcedureEnd
     {
         private static readonly Regex s_Params =
             new Regex(
                 @"^(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
                 RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
-        public ParseFunctionEnd(RawCommand rawCommand)
+        public ParseProcedureEnd(RawCommand rawCommand)
             : base(rawCommand)
         {
         }
@@ -38,7 +38,12 @@ namespace FirebirdMonitorTool.Function
                 if (result)
                 {
                     var paramsGroup = match.Groups["Params"];
-                    Params = paramsGroup.Value.Trim();
+                    var paramsValue = paramsGroup.Value.Trim();
+                    if (paramsValue == string.Empty)
+                    {
+                        paramsValue = null;
+                    }
+                    Params = paramsValue;
                     RemoveFirstCharactersOfMessage(paramsGroup.Length);
                 }
             }
