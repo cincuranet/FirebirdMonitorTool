@@ -11,6 +11,4 @@
         <Description>https://github.com/cincuranet/FirebirdMonitorTool</Description>
         <PackageTags>firebird, trace, audit</PackageTags>
     </PropertyGroup>
-    <ItemGroup>
-    </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Common;
+using FirebirdMonitorTool.Context;
 using FirebirdMonitorTool.Function;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
@@ -133,7 +134,7 @@ namespace FirebirdMonitorTool.Tests
             public void RollbackTransaction()
             {
                 var header = "2021-03-31T20:16:34.8720 (3148:00000001985311C0) ROLLBACK_TRANSACTION";
-                var message = @"	E:\DB\INGULKART\FAST.FDB (ATT_133776, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/50741)
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_133776, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/50741)
         (TRA_376968, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
       0 ms, 1 fetch(es), 1 mark(s)";
                 var result = Parse<ITransactionEnd>(header, message);
@@ -384,7 +385,7 @@ PLAN (T_FUNBOO NATURAL)";
             public void InternalAttachment()
             {
                 var header = "2021-03-31T19:47:25.6190 (3148:000000007ED40040) EXECUTE_STATEMENT_START";
-                var message = @"	C:\FAST\FIREBIRD\SECURITY3.FDB (ATT_141966, SYSDBA:NONE, NONE, <internal>)
+                var message = @"	C:\XXX\FIREBIRD\SECURITY3.FDB (ATT_141966, SYSDBA:NONE, NONE, <internal>)
         (TRA_140581, READ_COMMITTED | REC_VERSION | WAIT | READ_ONLY)
 
 Statement 25:
@@ -395,7 +396,7 @@ PLAN (PLG$SRP INDEX (RDB$PRIMARY2))
 
 param0 = varchar(93), ""CLIENT""";
                 var result = Parse<IStatementStart>(header, message);
-                Assert.AreEqual(@"C:\FAST\FIREBIRD\SECURITY3.FDB", result.DatabaseName);
+                Assert.AreEqual(@"C:\XXX\FIREBIRD\SECURITY3.FDB", result.DatabaseName);
                 Assert.AreEqual(141966, result.ConnectionId);
                 Assert.AreEqual("SYSDBA", result.User);
                 Assert.AreEqual("NONE", result.Role);
@@ -539,6 +540,37 @@ param1 = bigint, ""9084653""", result.Params);
                 Assert.AreEqual(null, result.TableCounts[2].Backout);
                 Assert.AreEqual(null, result.TableCounts[2].Purge);
                 Assert.AreEqual(null, result.TableCounts[2].Expunge);
+            }
+        }
+
+        public class Context
+        {
+            [Test]
+            public void SetContext()
+            {
+                var header = "2021-03-31T19:47:27.8160 (3148:000000007ED41EC0) SET_CONTEXT";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_127024, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49693)
+	E:\www\xxx.com\:12480
+		(TRA_96946, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+[USER_TRANSACTION] CTX_VERSION = ""13261594697357000""";
+                var result = Parse<ISetContext>(header, message);
+                Assert.AreEqual("USER_TRANSACTION", result.Namespace);
+                Assert.AreEqual("CTX_VERSION", result.Variable);
+                Assert.AreEqual(@"""13261594697357000""", result.Value);
+            }
+
+            [Test]
+            public void SetContextNull()
+            {
+                var header = "2021-03-31T19:47:38.0030 (3148:000000019853E3C0) SET_CONTEXT";
+                var message = @"	E:\DB\XXX\XXX.FDB (ATT_252823, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49804)
+	E:\www\xxx.com\:12480
+		(TRA_216128, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+[USER_TRANSACTION] CTX_SYNC_RUNNING = NULL";
+                var result = Parse<ISetContext>(header, message);
+                Assert.AreEqual("USER_TRANSACTION", result.Namespace);
+                Assert.AreEqual("CTX_SYNC_RUNNING", result.Variable);
+                Assert.AreEqual(@"NULL", result.Value);
             }
         }
 

@@ -1,5 +1,6 @@
 using System;
 using FirebirdMonitorTool.Attachment;
+using FirebirdMonitorTool.Context;
 using FirebirdMonitorTool.Function;
 using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Trace;
@@ -143,7 +144,7 @@ namespace FirebirdMonitorTool
             else if (IsCommand(rawCommand, "SET_CONTEXT"))
             {
                 // see "TracePluginImpl::log_event_set_context" for magic strings
-                return null;
+                return HandleParsing(new ParseSetContext(rawCommand));
             }
             else if (IsCommand(rawCommand, "ERROR AT"))
             {
