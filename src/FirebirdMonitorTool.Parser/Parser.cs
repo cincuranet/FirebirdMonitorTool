@@ -149,7 +149,7 @@ namespace FirebirdMonitorTool
             else if (IsCommand(rawCommand, "ERROR AT"))
             {
                 // see "TracePluginImpl::log_event_error" for magic strings
-                return null;
+                return HandleParsing(new ParseErrorAt(rawCommand));
             }
             else
             {

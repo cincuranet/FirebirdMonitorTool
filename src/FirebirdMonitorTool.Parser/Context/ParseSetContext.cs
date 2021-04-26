@@ -3,7 +3,7 @@ using FirebirdMonitorTool.Transaction;
 
 namespace FirebirdMonitorTool.Context
 {
-    internal class ParseSetContext : ParseTransaction, ISetContext
+    internal sealed class ParseSetContext : ParseTransaction, ISetContext
     {
         private static readonly Regex s_Regex =
             new Regex(
@@ -15,9 +15,9 @@ namespace FirebirdMonitorTool.Context
         {
         }
 
-        public string Namespace { get; set; }
-        public string Variable { get; set; }
-        public string Value { get; set; }
+        public string Namespace { get; private set; }
+        public string Variable { get; private set; }
+        public string Value { get; private set; }
 
         public override bool Parse()
         {
