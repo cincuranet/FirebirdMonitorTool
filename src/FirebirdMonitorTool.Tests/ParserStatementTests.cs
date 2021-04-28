@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Tests
     public sealed class ParserStatementTests : ParserTestsBase
     {
         [Test]
-        public void StatementPrepare()
+        public void Prepare()
         {
             var header = "2021-03-31T19:47:25.6070 (3148:000000007ED424C0) PREPARE_STATEMENT";
             var message = @"	E:\DB\XXX\XXX.FDB (ATT_476402, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49657)
@@ -28,7 +28,7 @@ PLAN SORT (SYNC_W_META_ALL_VERSION SYNC_W_META_ALL_VERSION_1 W_ACHIEVEMENT NATUR
         }
 
         [Test]
-        public void StatementStart()
+        public void Start()
         {
             var header = "2021-03-31T19:47:25.6190 (3148:000000007ED40040) EXECUTE_STATEMENT_START";
             var message = @"	C:\XXX\FIREBIRD\SECURITY3.FDB (ATT_141966, SYSDBA:NONE, NONE, <internal>)
@@ -49,7 +49,7 @@ param0 = varchar(93), ""CLIENT""";
         }
 
         [Test]
-        public void StatementStartNoParams()
+        public void StartNoParams()
         {
             var header = "2021-03-31T19:47:24.6870 (3148:000000007ED41EC0) EXECUTE_STATEMENT_START";
             var message = @"	E:\DB\XXX\XXX.FDB (ATT_476401, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49654)
@@ -95,7 +95,7 @@ param0 = varchar(93), ""CLIENT""";
         }
 
         [Test]
-        public void FreeStatement()
+        public void Free()
         {
             var header = "2021-03-31T19:47:25.7010 (3148:000000007ED424C0) FREE_STATEMENT";
             var message = @"	E:\DB\XXX.FDB (ATT_5555471, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49658)
@@ -131,7 +131,7 @@ PLAN (T_CLIENT_IP INDEX (FK_T_CL_IP_CL))";
         }
 
         [Test]
-        public void ExecuteStatementFinish()
+        public void Finish()
         {
             var header = "2021-03-31T19:47:27.0580 (3148:000000007ED424C0) EXECUTE_STATEMENT_FINISH";
             var message = @"	E:\DB\XXX.FDB (ATT_5555477, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49680)
@@ -163,7 +163,7 @@ param0 = bigint, ""8208866""
         }
 
         [Test]
-        public void ExecuteStatementFinishWithTableCounts()
+        public void FinishWithTableCounts()
         {
             var header = "2021-03-31T19:47:27.2050 (3148:000000007ED41EC0) EXECUTE_STATEMENT_FINISH";
             var message = @"	E:\DB\XXX.FDB (ATT_5555478, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49683)
@@ -222,6 +222,309 @@ param1 = bigint, ""9084653""", result.Params);
             Assert.AreEqual(null, result.TableCounts[2].Natural);
             Assert.AreEqual(1, result.TableCounts[2].Index);
             Assert.AreEqual(1, result.TableCounts[2].Update);
+            Assert.AreEqual(null, result.TableCounts[2].Insert);
+            Assert.AreEqual(null, result.TableCounts[2].Delete);
+            Assert.AreEqual(null, result.TableCounts[2].Backout);
+            Assert.AreEqual(null, result.TableCounts[2].Purge);
+            Assert.AreEqual(null, result.TableCounts[2].Expunge);
+        }
+
+        [Test]
+        public void PrepareExplainedPlan()
+        {
+            var header = "2021-04-27T19:16:31.2800 (30360:000000010DAB0E40) PREPARE_STATEMENT";
+            var message = @"	E:\DB\XXX\XXX.FDB (ATT_262218, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/56676)
+	E:\www\xxx.com\:12040
+		(TRA_265637, READ_COMMITTED | REC_VERSION | NOWAIT | READ_ONLY)
+
+Statement 131681:
+-------------------------------------------------------------------------------
+select f_fb_product_version from t_funboo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Select Expression
+    -> Table ""T_FUNBOO"" Full Scan
+      1 ms";
+            var result = Parse<IStatementPrepare>(header, message);
+            Assert.AreEqual(131681, result.StatementId);
+            Assert.AreEqual("select f_fb_product_version from t_funboo", result.Text);
+            Assert.AreEqual(@"Select Expression
+    -> Table ""T_FUNBOO"" Full Scan", result.Plan);
+            Assert.AreEqual(TimeSpan.FromMilliseconds(1), result.ElapsedTime);
+        }
+
+        [Test]
+        public void StartExplainedPlan()
+        {
+            var header = "2021-04-27T20:01:55.9880 (30360:000000010ED23040) EXECUTE_STATEMENT_START";
+            var message = @"	E:\DB\XXX\XXX.FDB (ATT_253716, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/60266)
+	E:\www\xxx.com\:4380
+		(TRA_255245, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+Statement 262290:
+-------------------------------------------------------------------------------
+SELECT membership0_.F_PRCC_ID as f18_34_1_, membership0_.F_MBS_ID as f1_34_1_, membership0_.F_MBS_ID as f1_34_0_, membership0_.F_MBS_DISCOUNT_ON_FIRST_DAY as f2_34_0_, membership0_.F_MBS_MOBILE_ACCESS as f3_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_HS_DEPOSIT as f4_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_NO_DEPOSIT as f5_34_0_, membership0_.F_MBS_DISCOUNT as f6_34_0_, membership0_.F_MBS_MAX_AGE as f7_34_0_, membership0_.F_MBS_MIN_AGE as f8_34_0_, membership0_.F_MBS_PERSONAL_PRINT as f9_34_0_, membership0_.F_MBS_PUBLIC as f10_34_0_, membership0_.F_MBS_EXPIRY_MAIL as f11_34_0_, membership0_.F_MBS_WELCOME_MAIL as f12_34_0_, membership0_.F_MBS_USE_FOR_EXPIRY_DATE as f13_34_0_, membership0_.CF_MBS_NAME as cf14_34_0_, membership0_.F_EXTERNAL_ID as f15_34_0_, membership0_.F_MBS_SHARED as f16_34_0_, membership0_.F_TRM_NAME_ID as f17_34_0_, membership0_.F_PRCC_ID as f18_34_0_, membership0_.F_PRD_ID as f19_34_0_ FROM T_MEMBERSHIP membership0_ WHERE membership0_.F_PRCC_ID in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Select Expression
+    -> Filter
+        -> Table ""T_MEMBERSHIP"" as ""MEMBERSHIP0_"" Access By ID
+            -> Bitmap Or
+                -> Bitmap Or
+                    -> Bitmap Or
+                        -> Bitmap Or
+                            -> Bitmap Or
+                                -> Bitmap Or
+                                    -> Bitmap Or
+                                        -> Bitmap Or
+                                            -> Bitmap Or
+                                                -> Bitmap Or
+                                                    -> Bitmap Or
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                    -> Bitmap
+                                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                -> Bitmap
+                                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                            -> Bitmap
+                                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                        -> Bitmap
+                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                    -> Bitmap
+                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                -> Bitmap
+                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                            -> Bitmap
+                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                        -> Bitmap
+                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                    -> Bitmap
+                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                -> Bitmap
+                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+
+param0 = bigint, ""152914""
+param1 = bigint, ""152916""
+param2 = bigint, ""152918""
+param3 = bigint, ""152920""
+param4 = bigint, ""152922""
+param5 = bigint, ""153231""
+param6 = bigint, ""592636""
+param7 = bigint, ""2108683""
+param8 = bigint, ""2664345""
+param9 = bigint, ""3007672""
+param10 = bigint, ""3613590""
+param11 = bigint, ""3673230""";
+            var result = Parse<IStatementStart>(header, message);
+            Assert.AreEqual(262290, result.StatementId);
+            Assert.AreEqual("SELECT membership0_.F_PRCC_ID as f18_34_1_, membership0_.F_MBS_ID as f1_34_1_, membership0_.F_MBS_ID as f1_34_0_, membership0_.F_MBS_DISCOUNT_ON_FIRST_DAY as f2_34_0_, membership0_.F_MBS_MOBILE_ACCESS as f3_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_HS_DEPOSIT as f4_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_NO_DEPOSIT as f5_34_0_, membership0_.F_MBS_DISCOUNT as f6_34_0_, membership0_.F_MBS_MAX_AGE as f7_34_0_, membership0_.F_MBS_MIN_AGE as f8_34_0_, membership0_.F_MBS_PERSONAL_PRINT as f9_34_0_, membership0_.F_MBS_PUBLIC as f10_34_0_, membership0_.F_MBS_EXPIRY_MAIL as f11_34_0_, membership0_.F_MBS_WELCOME_MAIL as f12_34_0_, membership0_.F_MBS_USE_FOR_EXPIRY_DATE as f13_34_0_, membership0_.CF_MBS_NAME as cf14_34_0_, membership0_.F_EXTERNAL_ID as f15_34_0_, membership0_.F_MBS_SHARED as f16_34_0_, membership0_.F_TRM_NAME_ID as f17_34_0_, membership0_.F_PRCC_ID as f18_34_0_, membership0_.F_PRD_ID as f19_34_0_ FROM T_MEMBERSHIP membership0_ WHERE membership0_.F_PRCC_ID in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", result.Text);
+            Assert.AreEqual(@"Select Expression
+    -> Filter
+        -> Table ""T_MEMBERSHIP"" as ""MEMBERSHIP0_"" Access By ID
+            -> Bitmap Or
+                -> Bitmap Or
+                    -> Bitmap Or
+                        -> Bitmap Or
+                            -> Bitmap Or
+                                -> Bitmap Or
+                                    -> Bitmap Or
+                                        -> Bitmap Or
+                                            -> Bitmap Or
+                                                -> Bitmap Or
+                                                    -> Bitmap Or
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                    -> Bitmap
+                                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                -> Bitmap
+                                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                            -> Bitmap
+                                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                        -> Bitmap
+                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                    -> Bitmap
+                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                -> Bitmap
+                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                            -> Bitmap
+                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                        -> Bitmap
+                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                    -> Bitmap
+                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                -> Bitmap
+                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)", result.Plan);
+            Assert.AreEqual(@"param0 = bigint, ""152914""
+param1 = bigint, ""152916""
+param2 = bigint, ""152918""
+param3 = bigint, ""152920""
+param4 = bigint, ""152922""
+param5 = bigint, ""153231""
+param6 = bigint, ""592636""
+param7 = bigint, ""2108683""
+param8 = bigint, ""2664345""
+param9 = bigint, ""3007672""
+param10 = bigint, ""3613590""
+param11 = bigint, ""3673230""", result.Params);
+        }
+
+        [Test]
+        public void FinishExplainedPlanWithTableCounts()
+        {
+            var header = "2021-04-27T20:01:55.9890 (30360:000000010ED23040) EXECUTE_STATEMENT_FINISH";
+            var message = @"	E:\DB\XXX\XXX.FDB (ATT_253716, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/60266)
+	E:\www\xxx.com\:4380
+		(TRA_255245, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+Statement 262290:
+-------------------------------------------------------------------------------
+SELECT membership0_.F_PRCC_ID as f18_34_1_, membership0_.F_MBS_ID as f1_34_1_, membership0_.F_MBS_ID as f1_34_0_, membership0_.F_MBS_DISCOUNT_ON_FIRST_DAY as f2_34_0_, membership0_.F_MBS_MOBILE_ACCESS as f3_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_HS_DEPOSIT as f4_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_NO_DEPOSIT as f5_34_0_, membership0_.F_MBS_DISCOUNT as f6_34_0_, membership0_.F_MBS_MAX_AGE as f7_34_0_, membership0_.F_MBS_MIN_AGE as f8_34_0_, membership0_.F_MBS_PERSONAL_PRINT as f9_34_0_, membership0_.F_MBS_PUBLIC as f10_34_0_, membership0_.F_MBS_EXPIRY_MAIL as f11_34_0_, membership0_.F_MBS_WELCOME_MAIL as f12_34_0_, membership0_.F_MBS_USE_FOR_EXPIRY_DATE as f13_34_0_, membership0_.CF_MBS_NAME as cf14_34_0_, membership0_.F_EXTERNAL_ID as f15_34_0_, membership0_.F_MBS_SHARED as f16_34_0_, membership0_.F_TRM_NAME_ID as f17_34_0_, membership0_.F_PRCC_ID as f18_34_0_, membership0_.F_PRD_ID as f19_34_0_ FROM T_MEMBERSHIP membership0_ WHERE membership0_.F_PRCC_ID in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Select Expression
+    -> Filter
+        -> Table ""T_MEMBERSHIP"" as ""MEMBERSHIP0_"" Access By ID
+            -> Bitmap Or
+                -> Bitmap Or
+                    -> Bitmap Or
+                        -> Bitmap Or
+                            -> Bitmap Or
+                                -> Bitmap Or
+                                    -> Bitmap Or
+                                        -> Bitmap Or
+                                            -> Bitmap Or
+                                                -> Bitmap Or
+                                                    -> Bitmap Or
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                    -> Bitmap
+                                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                -> Bitmap
+                                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                            -> Bitmap
+                                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                        -> Bitmap
+                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                    -> Bitmap
+                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                -> Bitmap
+                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                            -> Bitmap
+                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                        -> Bitmap
+                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                    -> Bitmap
+                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                -> Bitmap
+                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+
+param0 = bigint, ""152914""
+param1 = bigint, ""152916""
+param2 = bigint, ""152918""
+param3 = bigint, ""152920""
+param4 = bigint, ""152922""
+param5 = bigint, ""153231""
+param6 = bigint, ""592636""
+param7 = bigint, ""2108683""
+param8 = bigint, ""2664345""
+param9 = bigint, ""3007672""
+param10 = bigint, ""3613590""
+param11 = bigint, ""3673230""
+
+2 records fetched
+      0 ms, 52 fetch(es)
+
+Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge
+***************************************************************************************************************
+RDB$FORMATS                                       1                                                            
+T_TRANSLATION_META                                2                                                            
+T_MEMBERSHIP                                      2                                                            
+";
+            var result = Parse<IStatementFinish>(header, message);
+            Assert.AreEqual(262290, result.StatementId);
+            Assert.AreEqual("SELECT membership0_.F_PRCC_ID as f18_34_1_, membership0_.F_MBS_ID as f1_34_1_, membership0_.F_MBS_ID as f1_34_0_, membership0_.F_MBS_DISCOUNT_ON_FIRST_DAY as f2_34_0_, membership0_.F_MBS_MOBILE_ACCESS as f3_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_HS_DEPOSIT as f4_34_0_, membership0_.F_MBS_AUTO_ANONYMIZE_NO_DEPOSIT as f5_34_0_, membership0_.F_MBS_DISCOUNT as f6_34_0_, membership0_.F_MBS_MAX_AGE as f7_34_0_, membership0_.F_MBS_MIN_AGE as f8_34_0_, membership0_.F_MBS_PERSONAL_PRINT as f9_34_0_, membership0_.F_MBS_PUBLIC as f10_34_0_, membership0_.F_MBS_EXPIRY_MAIL as f11_34_0_, membership0_.F_MBS_WELCOME_MAIL as f12_34_0_, membership0_.F_MBS_USE_FOR_EXPIRY_DATE as f13_34_0_, membership0_.CF_MBS_NAME as cf14_34_0_, membership0_.F_EXTERNAL_ID as f15_34_0_, membership0_.F_MBS_SHARED as f16_34_0_, membership0_.F_TRM_NAME_ID as f17_34_0_, membership0_.F_PRCC_ID as f18_34_0_, membership0_.F_PRD_ID as f19_34_0_ FROM T_MEMBERSHIP membership0_ WHERE membership0_.F_PRCC_ID in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", result.Text);
+            Assert.AreEqual(@"Select Expression
+    -> Filter
+        -> Table ""T_MEMBERSHIP"" as ""MEMBERSHIP0_"" Access By ID
+            -> Bitmap Or
+                -> Bitmap Or
+                    -> Bitmap Or
+                        -> Bitmap Or
+                            -> Bitmap Or
+                                -> Bitmap Or
+                                    -> Bitmap Or
+                                        -> Bitmap Or
+                                            -> Bitmap Or
+                                                -> Bitmap Or
+                                                    -> Bitmap Or
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                        -> Bitmap
+                                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                    -> Bitmap
+                                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                                -> Bitmap
+                                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                            -> Bitmap
+                                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                        -> Bitmap
+                                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                    -> Bitmap
+                                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                                -> Bitmap
+                                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                            -> Bitmap
+                                -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                        -> Bitmap
+                            -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                    -> Bitmap
+                        -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)
+                -> Bitmap
+                    -> Index ""FK_MBS_PRCC_ID"" Range Scan (full match)", result.Plan);
+            Assert.AreEqual(@"param0 = bigint, ""152914""
+param1 = bigint, ""152916""
+param2 = bigint, ""152918""
+param3 = bigint, ""152920""
+param4 = bigint, ""152922""
+param5 = bigint, ""153231""
+param6 = bigint, ""592636""
+param7 = bigint, ""2108683""
+param8 = bigint, ""2664345""
+param9 = bigint, ""3007672""
+param10 = bigint, ""3613590""
+param11 = bigint, ""3673230""", result.Params);
+            Assert.AreEqual(2, result.RecordsFetched);
+            Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+            Assert.AreEqual(null, result.Reads);
+            Assert.AreEqual(null, result.Writes);
+            Assert.AreEqual(52, result.Fetches);
+            Assert.AreEqual(null, result.Marks);
+            Assert.AreEqual(3, result.TableCounts.Count);
+            Assert.AreEqual("RDB$FORMATS", result.TableCounts[0].Name);
+            Assert.AreEqual(null, result.TableCounts[0].Natural);
+            Assert.AreEqual(1, result.TableCounts[0].Index);
+            Assert.AreEqual(null, result.TableCounts[0].Update);
+            Assert.AreEqual(null, result.TableCounts[0].Insert);
+            Assert.AreEqual(null, result.TableCounts[0].Delete);
+            Assert.AreEqual(null, result.TableCounts[0].Backout);
+            Assert.AreEqual(null, result.TableCounts[0].Purge);
+            Assert.AreEqual(null, result.TableCounts[0].Expunge);
+            Assert.AreEqual("T_TRANSLATION_META", result.TableCounts[1].Name);
+            Assert.AreEqual(null, result.TableCounts[1].Natural);
+            Assert.AreEqual(2, result.TableCounts[1].Index);
+            Assert.AreEqual(null, result.TableCounts[1].Update);
+            Assert.AreEqual(null, result.TableCounts[1].Insert);
+            Assert.AreEqual(null, result.TableCounts[1].Delete);
+            Assert.AreEqual(null, result.TableCounts[1].Backout);
+            Assert.AreEqual(null, result.TableCounts[1].Purge);
+            Assert.AreEqual(null, result.TableCounts[1].Expunge);
+            Assert.AreEqual("T_MEMBERSHIP", result.TableCounts[2].Name);
+            Assert.AreEqual(null, result.TableCounts[2].Natural);
+            Assert.AreEqual(2, result.TableCounts[2].Index);
+            Assert.AreEqual(null, result.TableCounts[2].Update);
             Assert.AreEqual(null, result.TableCounts[2].Insert);
             Assert.AreEqual(null, result.TableCounts[2].Delete);
             Assert.AreEqual(null, result.TableCounts[2].Backout);

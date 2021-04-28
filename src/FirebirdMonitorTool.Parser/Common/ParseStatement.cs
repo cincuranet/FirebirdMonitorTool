@@ -89,6 +89,7 @@ namespace FirebirdMonitorTool.Common
                     // No plan
                     var split = EmptyLineSplitter.Split(Text, 2).ToList();
                     Text = split[0];
+                    Plan = null;
                     Params = split.ElementAtOrDefault(1);
                 }
             }
