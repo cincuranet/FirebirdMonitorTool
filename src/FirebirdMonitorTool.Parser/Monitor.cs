@@ -11,6 +11,7 @@ namespace FirebirdMonitorTool
         private RawCommand m_RawCommand;
 
         public event EventHandler<ParsedCommand> OnCommand;
+        public event EventHandler<Exception> OnError;
 
         public Monitor()
         {
@@ -52,12 +53,26 @@ namespace FirebirdMonitorTool
         {
             if (m_RawCommand != null)
             {
-                var rawTraceData = m_RawCommand;
-                rawTraceData.TraceMessage = m_TraceMessage.ToString();
+                var rawCommand = m_RawCommand;
+                rawCommand.TraceMessage = m_TraceMessage.ToString();
                 m_TraceMessage.Clear();
 
-                var parsedCommand = m_Parser.Parse(rawTraceData);
-                OnCommand?.Invoke(this, parsedCommand);
+                try
+                {
+                    var parsedCommand = m_Parser.Parse(rawCommand);
+                    OnCommand?.Invoke(this, parsedCommand);
+                }
+                catch (Exception ex)
+                {
+                    if (OnError != null)
+                    {
+                        OnError.Invoke(this, ex);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
         }
     }

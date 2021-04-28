@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Tests
     public class MonitorTests
     {
         [Test, Explicit]
-        public void TraceFile()
+        public void CanParseTraceFile()
         {
             var m = new Monitor();
             var data = File.ReadLines(@"I:\Downloads\trace.txt");
