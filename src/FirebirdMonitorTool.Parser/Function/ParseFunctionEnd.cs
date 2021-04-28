@@ -18,7 +18,7 @@ namespace FirebirdMonitorTool.Function
         }
 
         public string Params { get; private set; }
-#warning Parse this
+        // https://github.com/FirebirdSQL/firebird/issues/6782
         public long? RecordsFetched { get; private set; }
         public TimeSpan ElapsedTime { get; private set; }
         public long? Reads { get; private set; }
