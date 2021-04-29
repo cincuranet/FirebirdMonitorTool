@@ -1,11 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 
 namespace FirebirdMonitorTool
 {
     public sealed class Monitor
     {
-        private readonly object m_Locker;
         private readonly Parser m_Parser;
         private readonly StringBuilder m_TraceMessage;
         private RawCommand m_RawCommand;
@@ -15,7 +15,6 @@ namespace FirebirdMonitorTool
 
         public Monitor()
         {
-            m_Locker = new object();
             m_Parser = new Parser();
             m_TraceMessage = new StringBuilder(16 * 1024);
             m_RawCommand = null;
@@ -23,33 +22,22 @@ namespace FirebirdMonitorTool
 
         public void Process(string input)
         {
-            lock (m_Locker)
+            var rawCommand = RawCommand.TryMatch(input);
+            if (rawCommand != null)
             {
-                var rawCommand = RawCommand.TryMatch(input);
-                if (rawCommand != null)
+                Flush();
+                m_RawCommand = rawCommand;
+            }
+            else
+            {
+                if (m_RawCommand != null)
                 {
-                    FlushImpl();
-                    m_RawCommand = rawCommand;
-                }
-                else
-                {
-                    if (m_RawCommand != null)
-                    {
-                        m_TraceMessage.Append(input);
-                    }
+                    m_TraceMessage.Append(input);
                 }
             }
         }
 
         public void Flush()
-        {
-            lock (m_Locker)
-            {
-                FlushImpl();
-            }
-        }
-
-        private void FlushImpl()
         {
             if (m_RawCommand != null)
             {
@@ -74,6 +62,15 @@ namespace FirebirdMonitorTool
                     }
                 }
             }
+        }
+
+        public void LoadFile(string file)
+        {
+            foreach(var item in File.ReadLines(file))
+            {
+                Process(item + Environment.NewLine);
+            }
+            Flush();
         }
     }
 }

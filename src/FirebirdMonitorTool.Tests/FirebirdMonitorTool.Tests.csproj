@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="NUnit" Version="3.13.1" />
@@ -8,6 +8,6 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\FirebirdMonitorTool.Parser\FirebirdMonitorTool.csproj" />
+        <ProjectReference Include="..\FirebirdMonitorTool\FirebirdMonitorTool.csproj" />
     </ItemGroup>
 </Project>
