@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirebirdMonitorTool.Tests", "FirebirdMonitorTool.Tests\FirebirdMonitorTool.Tests.csproj", "{B023EA14-BEFE-4879-B9F7-AD2235C4A099}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirebirdMonitorTool.Profiler", "FirebirdMonitorTool.Profiler\FirebirdMonitorTool.Profiler.csproj", "{6A341CEF-4104-48E0-9A53-C47FBF230838}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirebirdMonitorTool.ConsoleProfiler", "FirebirdMonitorTool.ConsoleProfiler\FirebirdMonitorTool.ConsoleProfiler.csproj", "{6A341CEF-4104-48E0-9A53-C47FBF230838}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

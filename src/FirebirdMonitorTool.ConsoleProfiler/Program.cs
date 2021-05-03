@@ -11,7 +11,7 @@ using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Transaction;
 using FirebirdMonitorTool.Trigger;
 
-namespace FirebirdMonitorTool.Profiler
+namespace FirebirdMonitorTool.ConsoleProfiler
 {
     class Program
     {
