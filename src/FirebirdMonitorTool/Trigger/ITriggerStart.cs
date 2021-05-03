@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Trigger
 {
-    public interface ITriggerStart : ITrigger
-    {
-    }
+	public interface ITriggerStart : ITrigger
+	{
+	}
 }

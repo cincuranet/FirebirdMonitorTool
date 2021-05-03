@@ -2,8 +2,8 @@
 
 namespace FirebirdMonitorTool.Procedure
 {
-    public interface IProcedure : ITransaction
-    {
-        string ProcedureName { get; }
-    }
+	public interface IProcedure : ITransaction
+	{
+		string ProcedureName { get; }
+	}
 }

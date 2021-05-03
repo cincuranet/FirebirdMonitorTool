@@ -1,15 +1,15 @@
 ﻿namespace FirebirdMonitorTool.Trace
 {
-    internal sealed class ParseTraceEnd : ParseTrace, ITraceEnd
-    {
-        public ParseTraceEnd(RawCommand rawCommand)
-            : base(rawCommand)
-        {
-        }
+	sealed class ParseTraceEnd : ParseTrace, ITraceEnd
+	{
+		public ParseTraceEnd(RawCommand rawCommand)
+			: base(rawCommand)
+		{
+		}
 
-        public override bool Parse()
-        {
-            return base.Parse() && string.IsNullOrWhiteSpace(Message);
-        }
-    }
+		public override bool Parse()
+		{
+			return base.Parse() && string.IsNullOrWhiteSpace(Message);
+		}
+	}
 }

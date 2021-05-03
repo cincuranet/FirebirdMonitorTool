@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Attachment
 {
-    public interface IAttachmentEnd : IAttachment
-    {
-    }
+	public interface IAttachmentEnd : IAttachment
+	{
+	}
 }

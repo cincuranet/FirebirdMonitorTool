@@ -12,13 +12,13 @@ using NUnit.Framework;
 
 namespace FirebirdMonitorTool.Tests
 {
-    public class ProfilerTreeBuilderTests
-    {
-        [Test]
-        public void Test01()
-        {
-            var data = new[]
-            {
+	public class ProfilerTreeBuilderTests
+	{
+		[Test]
+		public void Test01()
+		{
+			var data = new[]
+			{
 @"2021-04-27T19:16:32.1570 (30360:000000010DAB0E40) TRACE_INIT",
 @"	SESSION_1 FOO",
 @"	",
@@ -334,60 +334,60 @@ namespace FirebirdMonitorTool.Tests
 @"",
 @"2021-04-27T19:16:32.2490 (30360:000000010DAB0E40) TRACE_FINI",
 @"	SESSION_1 FOO",
-            };
+			};
 
-            var nodes = new List<ProfilerTreeBuilder.Node>();
-            var builder = new ProfilerTreeBuilder();
-            builder.OnNode += (sender, node) => nodes.Add(node);
-            foreach (var item in data.Select(x => x + Environment.NewLine))
-                builder.Process(item);
-            builder.Flush();
-            Assert.AreEqual(1, nodes.Count);
-            Assert.AreEqual(2, nodes[0].Count);
-            Assert.IsTrue(nodes[0][0].Command.GetType().IsAssignableTo(typeof(IAttachmentStart)));
-            Assert.IsTrue(nodes[0][0][0].Command.GetType().IsAssignableTo(typeof(ITransactionStart)));
-            Assert.IsTrue(nodes[0][0][0][0].Command.GetType().IsAssignableTo(typeof(IStatementPrepare)));
-            Assert.IsTrue(nodes[0][0][0][1].Command.GetType().IsAssignableTo(typeof(IStatementStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0].Command.GetType().IsAssignableTo(typeof(IProcedureStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][0].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][1].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0].Command.GetType().IsAssignableTo(typeof(IProcedureStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][0][2].Command.GetType().IsAssignableTo(typeof(ISetContext)));
-            Assert.IsTrue(nodes[0][0][0][1][0][2][1].Command.GetType().IsAssignableTo(typeof(IProcedureEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][3].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][4].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][5].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][6].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][7].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][8].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][9].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][10].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][11].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][0][12].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][1][0][13].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][0][1][1].Command.GetType().IsAssignableTo(typeof(IProcedureEnd)));
-            Assert.IsTrue(nodes[0][0][0][2].Command.GetType().IsAssignableTo(typeof(IStatementFinish)));
-            Assert.IsTrue(nodes[0][0][0][3].Command.GetType().IsAssignableTo(typeof(IStatementFree)));
-            Assert.IsTrue(nodes[0][0][0][4].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
-            Assert.IsTrue(nodes[0][0][0][4][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
-            Assert.IsTrue(nodes[0][0][0][4][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
-            Assert.IsTrue(nodes[0][0][0][4][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
-            Assert.IsTrue(nodes[0][0][0][4][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
-            Assert.IsTrue(nodes[0][0][0][5].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
-            Assert.IsTrue(nodes[0][0][1].Command.GetType().IsAssignableTo(typeof(ITransactionEnd)));
-            Assert.IsTrue(nodes[0][1].Command.GetType().IsAssignableTo(typeof(IAttachmentEnd)));
-        }
+			var nodes = new List<ProfilerTreeBuilder.Node>();
+			var builder = new ProfilerTreeBuilder();
+			builder.OnNode += (sender, node) => nodes.Add(node);
+			foreach (var item in data.Select(x => x + Environment.NewLine))
+				builder.Process(item);
+			builder.Flush();
+			Assert.AreEqual(1, nodes.Count);
+			Assert.AreEqual(2, nodes[0].Count);
+			Assert.IsTrue(nodes[0][0].Command.GetType().IsAssignableTo(typeof(IAttachmentStart)));
+			Assert.IsTrue(nodes[0][0][0].Command.GetType().IsAssignableTo(typeof(ITransactionStart)));
+			Assert.IsTrue(nodes[0][0][0][0].Command.GetType().IsAssignableTo(typeof(IStatementPrepare)));
+			Assert.IsTrue(nodes[0][0][0][1].Command.GetType().IsAssignableTo(typeof(IStatementStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0].Command.GetType().IsAssignableTo(typeof(IProcedureStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][0].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][1].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0].Command.GetType().IsAssignableTo(typeof(IProcedureStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][0][2].Command.GetType().IsAssignableTo(typeof(ISetContext)));
+			Assert.IsTrue(nodes[0][0][0][1][0][2][1].Command.GetType().IsAssignableTo(typeof(IProcedureEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][3].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][4].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][5].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][6].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][7].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][8].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][9].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][10].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][11].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][0][12].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][1][0][13].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][0][1][1].Command.GetType().IsAssignableTo(typeof(IProcedureEnd)));
+			Assert.IsTrue(nodes[0][0][0][2].Command.GetType().IsAssignableTo(typeof(IStatementFinish)));
+			Assert.IsTrue(nodes[0][0][0][3].Command.GetType().IsAssignableTo(typeof(IStatementFree)));
+			Assert.IsTrue(nodes[0][0][0][4].Command.GetType().IsAssignableTo(typeof(ITriggerStart)));
+			Assert.IsTrue(nodes[0][0][0][4][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
+			Assert.IsTrue(nodes[0][0][0][4][0][0].Command.GetType().IsAssignableTo(typeof(IFunctionStart)));
+			Assert.IsTrue(nodes[0][0][0][4][0][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
+			Assert.IsTrue(nodes[0][0][0][4][1].Command.GetType().IsAssignableTo(typeof(IFunctionEnd)));
+			Assert.IsTrue(nodes[0][0][0][5].Command.GetType().IsAssignableTo(typeof(ITriggerEnd)));
+			Assert.IsTrue(nodes[0][0][1].Command.GetType().IsAssignableTo(typeof(ITransactionEnd)));
+			Assert.IsTrue(nodes[0][1].Command.GetType().IsAssignableTo(typeof(IAttachmentEnd)));
+		}
 
-        [Test, Explicit]
-        public void File()
-        {
-            var builder = new ProfilerTreeBuilder();
-            builder.LoadFile(@"C:\Users\Jiri\Downloads\trace.txt");
-        }
-    }
+		[Test, Explicit]
+		public void File()
+		{
+			var builder = new ProfilerTreeBuilder();
+			builder.LoadFile(@"C:\Users\Jiri\Downloads\trace.txt");
+		}
+	}
 }

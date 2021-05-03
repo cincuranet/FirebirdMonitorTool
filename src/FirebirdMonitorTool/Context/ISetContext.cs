@@ -2,10 +2,10 @@
 
 namespace FirebirdMonitorTool.Context
 {
-    public interface ISetContext : ITransaction
-    {
-        string Namespace { get; }
-        string VariableName { get; }
-        string Value { get; }
-    }
+	public interface ISetContext : ITransaction
+	{
+		string Namespace { get; }
+		string VariableName { get; }
+		string Value { get; }
+	}
 }

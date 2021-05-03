@@ -1,24 +1,24 @@
 ﻿namespace FirebirdMonitorTool.Procedure
 {
-    internal sealed class ParseProcedureStart : ParseProcedure, IProcedureStart
-    {
-        public ParseProcedureStart(RawCommand rawCommand)
-            : base(rawCommand)
-        {
-        }
+	sealed class ParseProcedureStart : ParseProcedure, IProcedureStart
+	{
+		public ParseProcedureStart(RawCommand rawCommand)
+			: base(rawCommand)
+		{
+		}
 
-        public string Params { get; private set; }
+		public string Params { get; private set; }
 
-        public override bool Parse()
-        {
-            var result = base.Parse();
+		public override bool Parse()
+		{
+			var result = base.Parse();
 
-            if (result && !string.IsNullOrWhiteSpace(Message))
-            {
-                Params = Message.Trim();
-            }
+			if (result && !string.IsNullOrWhiteSpace(Message))
+			{
+				Params = Message.Trim();
+			}
 
-            return result;
-        }
-    }
+			return result;
+		}
+	}
 }

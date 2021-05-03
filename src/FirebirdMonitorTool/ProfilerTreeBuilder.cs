@@ -11,137 +11,137 @@ using FirebirdMonitorTool.Trigger;
 
 namespace FirebirdMonitorTool
 {
-    public sealed class ProfilerTreeBuilder
-    {
-        public sealed class Node : IReadOnlyList<Node>
-        {
-            private readonly List<Node> m_Children;
+	public sealed class ProfilerTreeBuilder
+	{
+		public sealed class Node : IReadOnlyList<Node>
+		{
+			readonly List<Node> _children;
 
-            public ICommand Command { get; }
-            public Node Parent { get; private set; }
+			public ICommand Command { get; }
+			public Node Parent { get; private set; }
 
-            public Node(ICommand command)
-            {
-                m_Children = new List<Node>();
-                Command = command;
-            }
+			public Node(ICommand command)
+			{
+				_children = new List<Node>();
+				Command = command;
+			}
 
-            public void AddChild(Node node)
-            {
-                node.Parent = this;
-                m_Children.Add(node);
-            }
+			public void AddChild(Node node)
+			{
+				node.Parent = this;
+				_children.Add(node);
+			}
 
-            public override string ToString() => $"Command: {Command.GetType().Name}";
+			public override string ToString() => $"Command: {Command.GetType().Name}";
 
-            public int Count => m_Children.Count;
-            public Node this[int index] => m_Children[index];
-            public IEnumerator<Node> GetEnumerator() => m_Children.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        }
+			public int Count => _children.Count;
+			public Node this[int index] => _children[index];
+			public IEnumerator<Node> GetEnumerator() => _children.GetEnumerator();
+			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		}
 
-        private readonly Dictionary<(long internalTraceId, long connectionId), Node> m_LiveNodes;
-        private readonly Monitor m_Monitor;
+		readonly Dictionary<(long internalTraceId, long connectionId), Node> _liveNodes;
+		readonly Monitor _monitor;
 
-        public event EventHandler<Node> OnNode;
-        public event EventHandler<Exception> OnError
-        {
-            add { m_Monitor.OnError += value; }
-            remove { m_Monitor.OnError -= value; }
-        }
+		public event EventHandler<Node> OnNode;
+		public event EventHandler<Exception> OnError
+		{
+			add { _monitor.OnError += value; }
+			remove { _monitor.OnError -= value; }
+		}
 
-        public ProfilerTreeBuilder()
-        {
-            m_LiveNodes = new Dictionary<(long internalTraceId, long connectionId), Node>();
-            m_Monitor = new Monitor();
-            m_Monitor.OnCommand += (sender, command) =>
-            {
-                ProcessCommand(command);
-            };
-        }
+		public ProfilerTreeBuilder()
+		{
+			_liveNodes = new Dictionary<(long internalTraceId, long connectionId), Node>();
+			_monitor = new Monitor();
+			_monitor.OnCommand += (sender, command) =>
+			{
+				ProcessCommand(command);
+			};
+		}
 
-        public void Process(string input)
-        {
-            m_Monitor.Process(input);
-        }
+		public void Process(string input)
+		{
+			_monitor.Process(input);
+		}
 
-        public void Flush()
-        {
-            m_Monitor.Flush();
-        }
+		public void Flush()
+		{
+			_monitor.Flush();
+		}
 
-        public void LoadFile(string file)
-        {
-            m_Monitor.LoadFile(file);
-        }
+		public void LoadFile(string file)
+		{
+			_monitor.LoadFile(file);
+		}
 
-        private void ProcessCommand(ICommand command)
-        {
-            switch (command)
-            {
-                case not IAttachment:
-                    // considering only attachment bound commands
-                    break;
+		void ProcessCommand(ICommand command)
+		{
+			switch (command)
+			{
+				case not IAttachment:
+					// considering only attachment bound commands
+					break;
 
-                case IAttachmentStart attachmentStart:
-                    {
-                        var root = new Node(null);
-                        AddNextForRoot(attachmentStart, root);
-                        m_LiveNodes.Add((attachmentStart.InternalTraceId, attachmentStart.ConnectionId), root);
-                        break;
-                    }
-                case IAttachmentEnd attachmentEnd:
-                    {
-                        if (m_LiveNodes.Remove((attachmentEnd.InternalTraceId, attachmentEnd.ConnectionId), out var root))
-                        {
-                            AddNextForRoot(attachmentEnd, root);
-                            OnNode?.Invoke(this, root);
-                        }
-                        break;
-                    }
+				case IAttachmentStart attachmentStart:
+					{
+						var root = new Node(null);
+						AddNextForRoot(attachmentStart, root);
+						_liveNodes.Add((attachmentStart.InternalTraceId, attachmentStart.ConnectionId), root);
+						break;
+					}
+				case IAttachmentEnd attachmentEnd:
+					{
+						if (_liveNodes.Remove((attachmentEnd.InternalTraceId, attachmentEnd.ConnectionId), out var root))
+						{
+							AddNextForRoot(attachmentEnd, root);
+							OnNode?.Invoke(this, root);
+						}
+						break;
+					}
 
-                case IAttachment attachmentCommand:
-                    AddNext(attachmentCommand);
-                    break;
+				case IAttachment attachmentCommand:
+					AddNext(attachmentCommand);
+					break;
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(command), command.GetType().Name);
-            }
-        }
+				default:
+					throw new ArgumentOutOfRangeException(nameof(command), command.GetType().Name);
+			}
+		}
 
-        private Node AddNext(IAttachment attachmentCommand)
-        {
-            if (!m_LiveNodes.TryGetValue((attachmentCommand.InternalTraceId, attachmentCommand.ConnectionId), out var root))
-            {
-                return null;
-            }
-            return AddNextForRoot(attachmentCommand, root);
-        }
+		Node AddNext(IAttachment attachmentCommand)
+		{
+			if (!_liveNodes.TryGetValue((attachmentCommand.InternalTraceId, attachmentCommand.ConnectionId), out var root))
+			{
+				return null;
+			}
+			return AddNextForRoot(attachmentCommand, root);
+		}
 
-        private static Node AddNextForRoot(IAttachment attachmentCommand, Node root)
-        {
-            var node = new Node(attachmentCommand);
-            GetCurrentNode(GetWorkingNode(root), attachmentCommand).AddChild(node);
-            return node;
-        }
+		static Node AddNextForRoot(IAttachment attachmentCommand, Node root)
+		{
+			var node = new Node(attachmentCommand);
+			GetCurrentNode(GetWorkingNode(root), attachmentCommand).AddChild(node);
+			return node;
+		}
 
-        private static Node GetCurrentNode(Node node, ICommand command)
-        {
-            return command is IAttachmentEnd or ITransactionEnd or IStatementFinish or ITriggerEnd or IProcedureEnd or IFunctionEnd
-                ? node.Parent
-                : node;
-        }
+		static Node GetCurrentNode(Node node, ICommand command)
+		{
+			return command is IAttachmentEnd or ITransactionEnd or IStatementFinish or ITriggerEnd or IProcedureEnd or IFunctionEnd
+				? node.Parent
+				: node;
+		}
 
-        private static Node GetWorkingNode(Node node)
-        {
-            if (node.Count == 0)
-            {
-                return node;
-            }
-            var lastNode = GetWorkingNode(node[^1]);
-            return lastNode.Command is IAttachmentStart or ITransactionStart or IStatementStart or IFunctionStart or IProcedureStart or ITriggerStart
-                ? lastNode
-                : lastNode.Parent;
-        }
-    }
+		static Node GetWorkingNode(Node node)
+		{
+			if (node.Count == 0)
+			{
+				return node;
+			}
+			var lastNode = GetWorkingNode(node[^1]);
+			return lastNode.Command is IAttachmentStart or ITransactionStart or IStatementStart or IFunctionStart or IProcedureStart or ITriggerStart
+				? lastNode
+				: lastNode.Parent;
+		}
+	}
 }

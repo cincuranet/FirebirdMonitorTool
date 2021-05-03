@@ -2,8 +2,8 @@
 
 namespace FirebirdMonitorTool.Statement
 {
-    public interface IStatementStart : IStatement, ITransaction
-    {
-        string Params { get; }
-    }
+	public interface IStatementStart : IStatement, ITransaction
+	{
+		string Params { get; }
+	}
 }

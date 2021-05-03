@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Statement
 {
-    public interface IStatementFree : IStatement
-    {
-    }
+	public interface IStatementFree : IStatement
+	{
+	}
 }

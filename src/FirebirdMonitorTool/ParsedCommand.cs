@@ -4,42 +4,41 @@ using FirebirdMonitorTool.Common;
 
 namespace FirebirdMonitorTool
 {
-    public abstract class ParsedCommand : ICommand
-    {
-        private readonly RawCommand m_RawCommand;
+	public abstract class ParsedCommand : ICommand
+	{
+		readonly RawCommand _rawCommand;
+		readonly StringBuilder _workingMessage;
 
-        private readonly StringBuilder m_WorkingMessage;
+		protected ParsedCommand(RawCommand rawCommand)
+		{
+			_rawCommand = rawCommand;
+			_workingMessage = new StringBuilder(_rawCommand.TraceMessage);
+			SetMessage();
+		}
 
-        protected ParsedCommand(RawCommand rawCommand)
-        {
-            m_RawCommand = rawCommand;
-            m_WorkingMessage = new StringBuilder(m_RawCommand.TraceMessage);
-            SetMessage();
-        }
+		public abstract bool Parse();
 
-        public abstract bool Parse();
+		public DateTime TimeStamp => _rawCommand.TimeStamp;
+		public int ServerProcessId => _rawCommand.ServerProcessId;
+		public long InternalTraceId => _rawCommand.InternalTraceId;
+		public string Command => _rawCommand.Command;
+		public string TraceMessage => _rawCommand.TraceMessage;
 
-        public DateTime TimeStamp => m_RawCommand.TimeStamp;
-        public int ServerProcessId => m_RawCommand.ServerProcessId;
-        public long InternalTraceId => m_RawCommand.InternalTraceId;
-        public string Command => m_RawCommand.Command;
-        public string TraceMessage => m_RawCommand.TraceMessage;
+		protected string Message { get; private set; }
 
-        protected string Message { get; private set; }
+		protected void RemoveFirstCharactersOfMessage(int count)
+		{
+			count = Math.Min(count, Message.Length);
+			if (count > 0)
+			{
+				_workingMessage.Remove(0, count);
+				SetMessage();
+			}
+		}
 
-        protected void RemoveFirstCharactersOfMessage(int count)
-        {
-            count = Math.Min(count, Message.Length);
-            if (count > 0)
-            {
-                m_WorkingMessage.Remove(0, count);
-                SetMessage();
-            }
-        }
-
-        private void SetMessage()
-        {
-            Message = m_WorkingMessage.ToString();
-        }
-    }
+		void SetMessage()
+		{
+			Message = _workingMessage.ToString();
+		}
+	}
 }

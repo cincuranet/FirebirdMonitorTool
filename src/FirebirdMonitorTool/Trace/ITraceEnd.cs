@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Trace
 {
-    public interface ITraceEnd : ITrace
-    {
-    }
+	public interface ITraceEnd : ITrace
+	{
+	}
 }

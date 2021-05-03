@@ -1,6 +1,6 @@
 ﻿namespace FirebirdMonitorTool.Transaction
 {
-    public interface ITransactionStart : ITransaction
-    {
-    }
+	public interface ITransactionStart : ITransaction
+	{
+	}
 }

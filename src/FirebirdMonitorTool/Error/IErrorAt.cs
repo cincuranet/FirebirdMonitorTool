@@ -2,9 +2,9 @@
 
 namespace FirebirdMonitorTool.Error
 {
-    public interface IErrorAt : IAttachment
-    {
-        string Location { get; }
-        string Error { get; }
-    }
+	public interface IErrorAt : IAttachment
+	{
+		string Location { get; }
+		string Error { get; }
+	}
 }

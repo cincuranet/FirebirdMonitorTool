@@ -3,8 +3,8 @@ using FirebirdMonitorTool.Transaction;
 
 namespace FirebirdMonitorTool.Statement
 {
-    public interface IStatementPrepare : IStatement, ITransaction
-    {
-        TimeSpan ElapsedTime { get; }
-    }
+	public interface IStatementPrepare : IStatement, ITransaction
+	{
+		TimeSpan ElapsedTime { get; }
+	}
 }
