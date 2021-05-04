@@ -9,18 +9,19 @@ namespace FirebirdMonitorTool.Common
 		const string HeaderLine = "Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge";
 		const string HeaderSeparator = "***************************************************************************************************************";
 
-		readonly string _message;
+		public string Message { get; private set; }
 
 		public ParseTableCounts(string message)
 		{
-			_message = message;
+			Message = message;
 		}
 
 		public IReadOnlyList<TableCount> TableCounts { get; private set; }
 
+
 		public bool Parse()
 		{
-			var strings = _message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+			var strings = Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 			if (strings.Length > 2
 				&& strings[0].EndsWith(HeaderLine, StringComparison.InvariantCulture)
 				&& strings[1].EndsWith(HeaderSeparator, StringComparison.InvariantCulture))
