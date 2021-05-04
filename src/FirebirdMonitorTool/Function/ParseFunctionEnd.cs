@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Common;
 
 namespace FirebirdMonitorTool.Function
 {
 	sealed class ParseFunctionEnd : ParseFunction, IFunctionEnd
 	{
-		static readonly Regex ParserParams =
-			new Regex(
-				@"^(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
-				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
-
 		public ParseFunctionEnd(RawCommand rawCommand)
 			: base(rawCommand)
 		{
@@ -33,28 +27,27 @@ namespace FirebirdMonitorTool.Function
 
 			if (result)
 			{
-				var match = ParserParams.Match(Message);
-				result = match.Success;
+				var parseParams = new ParseParams(Message);
+				result = parseParams.Parse();
 				if (result)
 				{
-					var paramsGroup = match.Groups["Params"];
-					Params = paramsGroup.Value.Trim();
-					RemoveFirstCharactersOfMessage(paramsGroup.Length);
+					Params = parseParams.Params;
+					RemoveFirstCharactersOfMessage(parseParams.CharactersParsed);
 				}
 			}
 
 			if (result)
 			{
-				var counters = new ParseCounters(Message);
-				result = counters.Parse();
+				var parseCounters = new ParseCounters(Message);
+				result = parseCounters.Parse();
 				if (result)
 				{
-					ElapsedTime = counters.ElapsedTime;
-					Reads = counters.Reads;
-					Writes = counters.Writes;
-					Fetches = counters.Fetches;
-					Marks = counters.Marks;
-					RemoveFirstCharactersOfMessage(counters.CharactersParsed);
+					ElapsedTime = parseCounters.ElapsedTime;
+					Reads = parseCounters.Reads;
+					Writes = parseCounters.Writes;
+					Fetches = parseCounters.Fetches;
+					Marks = parseCounters.Marks;
+					RemoveFirstCharactersOfMessage(parseCounters.CharactersParsed);
 				}
 			}
 

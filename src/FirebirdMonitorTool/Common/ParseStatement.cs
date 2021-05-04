@@ -54,25 +54,26 @@ namespace FirebirdMonitorTool.Common
 				Option.ELAPSED_TIME => ParserElapsedTime,
 				_ => throw new ArgumentOutOfRangeException(nameof(option)),
 			};
-			var statementMatch = regex.Match(Message);
-			if (statementMatch.Success)
+			var match = regex.Match(Message);
+			var result = match.Success;
+			if (result)
 			{
-				Id = long.Parse(statementMatch.Groups["StatementId"].Value);
-				Text = statementMatch.Groups["Text"].Value.Trim();
+				Id = long.Parse(match.Groups["StatementId"].Value);
+				Text = match.Groups["Text"].Value.Trim();
 				switch (option)
 				{
 					case Option.RECORDS_FETCHED:
-						RecordsFetched = long.Parse(statementMatch.Groups["Number"].Value);
+						RecordsFetched = long.Parse(match.Groups["Number"].Value);
 						break;
 					case Option.ELAPSED_TIME:
-						ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(statementMatch.Groups["Number"].Value));
+						ElapsedTime = TimeSpan.FromMilliseconds(long.Parse(match.Groups["Number"].Value));
 						break;
 				}
-				CharactersParsed = statementMatch.Groups[0].Length;
+				CharactersParsed = match.Groups[0].Length;
 			}
 
 			// Check for a plan
-			if (statementMatch.Success)
+			if (result)
 			{
 				var index = Text.IndexOf(PlanSeparator, StringComparison.InvariantCulture);
 				if (index >= 0)
@@ -93,7 +94,7 @@ namespace FirebirdMonitorTool.Common
 				}
 			}
 
-			return statementMatch.Success;
+			return result;
 		}
 	}
 }

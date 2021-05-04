@@ -24,16 +24,16 @@ namespace FirebirdMonitorTool.Transaction
 
 			if (result)
 			{
-				var counters = new ParseCounters(Message);
-				result = counters.Parse();
+				var parseCounters = new ParseCounters(Message);
+				result = parseCounters.Parse();
 				if (result)
 				{
-					ElapsedTime = counters.ElapsedTime;
-					Reads = counters.Reads;
-					Writes = counters.Writes;
-					Fetches = counters.Fetches;
-					Marks = counters.Marks;
-					RemoveFirstCharactersOfMessage(counters.CharactersParsed);
+					ElapsedTime = parseCounters.ElapsedTime;
+					Reads = parseCounters.Reads;
+					Writes = parseCounters.Writes;
+					Fetches = parseCounters.Fetches;
+					Marks = parseCounters.Marks;
+					RemoveFirstCharactersOfMessage(parseCounters.CharactersParsed);
 				}
 			}
 
