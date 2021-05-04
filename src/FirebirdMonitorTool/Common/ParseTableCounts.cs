@@ -18,7 +18,6 @@ namespace FirebirdMonitorTool.Common
 
 		public IReadOnlyList<TableCount> TableCounts { get; private set; }
 
-
 		public bool Parse()
 		{
 			var strings = Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
