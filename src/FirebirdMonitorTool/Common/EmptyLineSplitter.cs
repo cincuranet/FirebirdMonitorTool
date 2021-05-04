@@ -7,6 +7,11 @@ namespace FirebirdMonitorTool.Common
 {
 	static class EmptyLineSplitter
 	{
+		static readonly Regex Parser =
+			new Regex(
+				@"(?<Value>.*?(\r\n|\r|\n))|(?<Value>.+$)",
+				RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
 		public static IEnumerable<string> Split(string message, int max)
 		{
 			if (max <= 0)
@@ -15,7 +20,7 @@ namespace FirebirdMonitorTool.Common
 			}
 
 			var builder = new StringBuilder();
-			var lines = Regex.Matches(message, "(?<Value>.*?(\r\n|\r|\n))|(?<Value>.+$)");
+			var lines = Parser.Matches(message);
 			for (var i = 0; i < lines.Count; i++)
 			{
 				var value = lines[i].Groups["Value"].Value;
