@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Common;
@@ -17,14 +19,17 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 	{
 		static void Main(string[] args)
 		{
-			var profiler = new ProfilerTreeBuilder();
-			profiler.OnNode += (sender, node) =>
+			using (var output = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false), 512 * 1024))
 			{
-				Console.WriteLine(BuildNodeText(node[0].Command));
-				WriteTreeRec(node[0], 1);
-				Console.WriteLine();
-			};
-			profiler.LoadFile(args[0]);
+				var profiler = new ProfilerTreeBuilder();
+				profiler.OnNode += (sender, node) =>
+				{
+					output.WriteLine(BuildNodeText(node[0].Command));
+					WriteTreeRec(output, node[0], 1);
+					output.WriteLine();
+				};
+				profiler.LoadFile(args[0]);
+			}
 		}
 
 		static string BuildNodeText(ICommand command)
@@ -51,17 +56,17 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 			};
 		}
 
-		static void WriteTreeRec(IReadOnlyList<ProfilerTreeBuilder.Node> nodes, int indent)
+		static void WriteTreeRec(StreamWriter output, IReadOnlyList<ProfilerTreeBuilder.Node> nodes, int indent)
 		{
 			for (var i = 0; i < nodes.Count; i++)
 			{
 				for (var j = 0; j < indent - 1; j++)
 				{
-					Console.Write("│ ");
+					output.Write("│ ");
 				}
-				Console.Write(i == nodes.Count - 1 ? "└ " : "├ ");
-				Console.WriteLine(BuildNodeText(nodes[i].Command));
-				WriteTreeRec(nodes[i], indent + 1);
+				output.Write(i == nodes.Count - 1 ? "└ " : "├ ");
+				output.WriteLine(BuildNodeText(nodes[i].Command));
+				WriteTreeRec(output, nodes[i], indent + 1);
 			}
 		}
 
