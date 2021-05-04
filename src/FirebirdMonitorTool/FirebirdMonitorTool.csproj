@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>FirebirdMonitorTool.Parser</PackageId>
-        <PackageVersion>$(Version)</PackageVersion>
-        <Authors>Jiří Činčura, Danny Van den Wouwer</Authors>
-        <PackageProjectUrl>https://github.com/cincuranet/FirebirdMonitorTool</PackageProjectUrl>
-        <Description>https://github.com/cincuranet/FirebirdMonitorTool</Description>
-        <PackageTags>firebird, trace, audit</PackageTags>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PackageId>FirebirdMonitorTool</PackageId>
+		<PackageVersion>$(Version)</PackageVersion>
+		<Authors>Jiří Činčura, Danny Van den Wouwer</Authors>
+		<PackageProjectUrl>https://github.com/cincuranet/FirebirdMonitorTool</PackageProjectUrl>
+		<Description>https://github.com/cincuranet/FirebirdMonitorTool</Description>
+		<PackageTags>firebird, trace, audit, parser, profiler, profiling</PackageTags>
+	</PropertyGroup>
 </Project>
