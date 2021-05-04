@@ -127,7 +127,7 @@ namespace FirebirdMonitorTool
 
 		static Node GetCurrentNode(Node node, ICommand command)
 		{
-			return command is IAttachmentEnd or ITransactionEnd or IStatementFinish or ITriggerEnd or IProcedureEnd or IFunctionEnd
+			return command is IAttachmentEnd or ITransactionEnd or IStatementFinish or IProcedureEnd or IFunctionEnd or ITriggerEnd
 				? node.Parent
 				: node;
 		}
