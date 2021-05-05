@@ -37,7 +37,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 			return command switch
 			{
 				IAttachmentStart c => $"Attachment {c.ConnectionId}: {c.RemoteProcessName}",
-				ITransactionStart c => $"Transaction {c.TransactionId} Start: {c.IsolationMode}",
+				ITransactionStart c => $"Transaction {c.TransactionId} Start: {c.IsolationMode} (RO: {c.ReadOnly} | RV: {c.RecordVersion} | W: {c.Wait})",
 				ITransactionEnd c => $"Transaction {c.TransactionId} End ({c.ElapsedTime.TotalMilliseconds} ms): {c.Command}",
 				IStatementPrepare c => $"Statement {c.StatementId} Prepare ({c.ElapsedTime.TotalMilliseconds} ms): {ReformatText(c.Text)}",
 				IStatementStart c => $"Statement {c.StatementId} Start: {ReformatText(c.Text)}",
