@@ -101,12 +101,6 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 			trace.DatabasesConfigurations.Add(configuration);
 
 			var profiler = new ProfilerTreeBuilder();
-			profiler.OnError += (sender, ex) =>
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.Error.WriteLine(ex);
-				Console.ResetColor();
-			};
 
 			var stream = File.Exists(options.Output)
 				? File.OpenWrite(options.Output)
