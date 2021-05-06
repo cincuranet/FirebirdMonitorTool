@@ -20,7 +20,7 @@ namespace FirebirdMonitorTool.Common
 
 		public bool Parse()
 		{
-			var strings = Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+			var strings = Message.TrimStart().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 			if (strings.Length > 2
 				&& strings[0].EndsWith(HeaderLine, StringComparison.InvariantCulture)
 				&& strings[1].EndsWith(HeaderSeparator, StringComparison.InvariantCulture))

@@ -6,7 +6,7 @@
 	<PropertyGroup>
 		<PackageId>FirebirdMonitorTool</PackageId>
 		<PackageVersion>$(Version)</PackageVersion>
-		<Authors>Jiří Činčura, Danny Van den Wouwer</Authors>
+		<Authors>$(BasicAuthors)</Authors>
 		<PackageProjectUrl>https://github.com/cincuranet/FirebirdMonitorTool</PackageProjectUrl>
 		<Description>https://github.com/cincuranet/FirebirdMonitorTool</Description>
 		<PackageTags>firebird, trace, audit, parser, profiler, profiling</PackageTags>

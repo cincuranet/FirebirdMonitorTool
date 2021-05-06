@@ -3,5 +3,6 @@
 		<LangVersion>latest</LangVersion>
 		<Version>1.0.0.0</Version>
 		<Product>FirebirdMonitorTool</Product>
+		<BasicAuthors>Jiří Činčura, Danny Van den Wouwer</BasicAuthors>
 	</PropertyGroup>
 </Project>

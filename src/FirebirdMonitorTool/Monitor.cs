@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 
 namespace FirebirdMonitorTool
@@ -62,15 +61,6 @@ namespace FirebirdMonitorTool
 					}
 				}
 			}
-		}
-
-		public void LoadFile(string file)
-		{
-			foreach (var item in File.ReadLines(file))
-			{
-				Process(item + Environment.NewLine);
-			}
-			Flush();
 		}
 	}
 }

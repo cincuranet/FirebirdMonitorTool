@@ -382,12 +382,5 @@ namespace FirebirdMonitorTool.Tests
 			Assert.IsTrue(nodes[0][0][1].Command.GetType().IsAssignableTo(typeof(ITransactionEnd)));
 			Assert.IsTrue(nodes[0][1].Command.GetType().IsAssignableTo(typeof(IAttachmentEnd)));
 		}
-
-		[Test, Explicit]
-		public void File()
-		{
-			var builder = new ProfilerTreeBuilder();
-			builder.LoadFile(@"C:\Users\Jiri\Downloads\trace.txt");
-		}
 	}
 }

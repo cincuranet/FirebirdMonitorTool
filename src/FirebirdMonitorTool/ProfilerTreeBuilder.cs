@@ -70,11 +70,6 @@ namespace FirebirdMonitorTool
 			_monitor.Flush();
 		}
 
-		public void LoadFile(string file)
-		{
-			_monitor.LoadFile(file);
-		}
-
 		void ProcessCommand(ICommand command)
 		{
 			switch (command)

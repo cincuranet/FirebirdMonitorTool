@@ -6,7 +6,7 @@ namespace FirebirdMonitorTool.Common
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
+				@"^\s*(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		public string Message { get; private set; }
