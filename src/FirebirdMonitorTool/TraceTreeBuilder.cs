@@ -11,7 +11,7 @@ using FirebirdMonitorTool.Trigger;
 
 namespace FirebirdMonitorTool
 {
-	public sealed class ProfilerTreeBuilder
+	public sealed class TraceTreeBuilder
 	{
 		public sealed class Node : IReadOnlyList<Node>
 		{
@@ -50,7 +50,7 @@ namespace FirebirdMonitorTool
 			remove { _monitor.OnError -= value; }
 		}
 
-		public ProfilerTreeBuilder()
+		public TraceTreeBuilder()
 		{
 			_liveNodes = new Dictionary<(long internalTraceId, long connectionId), Node>();
 			_monitor = new Monitor();

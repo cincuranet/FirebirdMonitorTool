@@ -336,7 +336,7 @@ namespace FirebirdMonitorTool.Tests
 @"	SESSION_1 FOO",
 			};
 
-			var nodes = new List<ProfilerTreeBuilder.Node>();
+			var nodes = new List<TraceTreeBuilder.Node>();
 			var builder = new ProfilerTreeBuilder();
 			builder.OnNode += (sender, node) => nodes.Add(node);
 			foreach (var item in data.Select(x => x + Environment.NewLine))
