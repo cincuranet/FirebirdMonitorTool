@@ -531,5 +531,23 @@ param11 = bigint, ""3673230""", result.Params);
 			Assert.AreEqual(null, result.TableCounts[2].Purge);
 			Assert.AreEqual(null, result.TableCounts[2].Expunge);
 		}
+
+		[Test]
+		public void PrepareFailed()
+		{
+			var header = "2021-05-10T08:44:47.6560 (18064:0000000004430640) FAILED PREPARE_STATEMENT";
+			var message = @" 	X:\FIREBIRD-3.0.7.33374-1_X64\TEST.FDB (ATT_6459, SYSDBA:NONE, NONE, TCPv6:::1/52763)
+ 	X:\Firebird-3.0.7.33374-1_x64\isql.exe:19896
+ 		(TRA_4064, READ_COMMITTED | NO_REC_VERSION | WAIT | READ_WRITE)
+ 
+ -------------------------------------------------------------------------------
+ nvdskfljvdf
+       0 ms";
+			var result = Parse<IStatementPrepare>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("nvdskfljvdf", result.Text);
+			Assert.AreEqual(null, result.Plan);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+		}
 	}
 }
