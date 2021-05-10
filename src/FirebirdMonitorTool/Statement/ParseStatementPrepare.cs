@@ -10,7 +10,7 @@ namespace FirebirdMonitorTool.Statement
 		{
 		}
 
-		public long StatementId { get; private set; }
+		public long? StatementId { get; private set; }
 		public string Text { get; private set; }
 		public string Plan { get; private set; }
 		public TimeSpan ElapsedTime { get; private set; }

@@ -27,7 +27,7 @@ namespace FirebirdMonitorTool.Common
 
 		static readonly Regex ParserElapsedTime =
 			new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\r\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s*(?<Number>\d+)\sms",
+				@"^\s*(Statement\s(?<StatementId>\d+):\r)?\s?-{79}\r\s?(?<Text>[\u0000-\uFFFF]*)\r\s*(?<Number>\d+)\sms",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		public string Message { get; private set; }
@@ -37,7 +37,7 @@ namespace FirebirdMonitorTool.Common
 			Message = message;
 		}
 
-		public long Id { get; private set; }
+		public long? Id { get; private set; }
 		public string Text { get; private set; }
 		public string Plan { get; private set; }
 		public long? RecordsFetched { get; private set; }
@@ -58,7 +58,7 @@ namespace FirebirdMonitorTool.Common
 			var result = match.Success;
 			if (result)
 			{
-				Id = long.Parse(match.Groups["StatementId"].Value);
+				Id = match.Groups["StatementId"].Success ? long.Parse(match.Groups["StatementId"].Value) : default(long?);
 				Text = match.Groups["Text"].Value.Trim();
 				switch (option)
 				{
