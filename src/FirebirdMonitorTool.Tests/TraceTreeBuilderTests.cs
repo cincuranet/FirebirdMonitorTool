@@ -12,7 +12,7 @@ using NUnit.Framework;
 
 namespace FirebirdMonitorTool.Tests
 {
-	public class ProfilerTreeBuilderTests
+	public class TraceTreeBuilderTests
 	{
 		[Test]
 		public void Test01()
@@ -337,7 +337,7 @@ namespace FirebirdMonitorTool.Tests
 			};
 
 			var nodes = new List<TraceTreeBuilder.Node>();
-			var builder = new ProfilerTreeBuilder();
+			var builder = new TraceTreeBuilder();
 			builder.OnNode += (sender, node) => nodes.Add(node);
 			foreach (var item in data.Select(x => x + Environment.NewLine))
 				builder.Process(item);
