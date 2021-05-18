@@ -55,9 +55,9 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				IAttachmentStart c => $"Attachment {c.ConnectionId}: {c.RemoteProcessName}",
 				ITransactionStart c => $"Transaction {c.TransactionId} Start: {c.IsolationMode} (RO: {c.ReadOnly} | RV: {c.RecordVersion} | W: {c.Wait})",
 				ITransactionEnd c => $"Transaction {c.TransactionId} End ({c.ElapsedTime.TotalMilliseconds} ms): {c.Command}",
-				IStatementPrepare c => $"Statement {c.StatementId} Prepare ({c.ElapsedTime.TotalMilliseconds} ms): {ReformatText(c.Text)}",
-				IStatementStart c => $"Statement {c.StatementId} Start: {ReformatText(c.Text)}",
-				IStatementFinish c => $"Statement {c.StatementId} Finish ({c.ElapsedTime.TotalMilliseconds} ms): {ReformatText(c.Text)}",
+				IStatementPrepare c => $"Statement {c.StatementId} Prepare ({c.ElapsedTime.TotalMilliseconds} ms): {c.Text.Escape()}",
+				IStatementStart c => $"Statement {c.StatementId} Start: {c.Text.Escape()}",
+				IStatementFinish c => $"Statement {c.StatementId} Finish ({c.ElapsedTime.TotalMilliseconds} ms): {c.Text.Escape()}",
 				IStatementClose c => $"Statement {c.StatementId} Close",
 				IStatementFree c => $"Statement {c.StatementId} Free",
 				ITriggerStart c => $"Trigger '{c.TriggerName}' Start",
@@ -67,7 +67,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				IFunctionStart c => $"Function '{c.FunctionName}' Start",
 				IFunctionEnd c => $"Function '{c.FunctionName}' End ({c.ElapsedTime.TotalMilliseconds} ms)",
 				ISetContext c => $"Set Context: {c.VariableName}",
-				IErrorAt c => $"Error {ReformatText(c.Error)}",
+				IErrorAt c => $"Error {c.Error.Escape()}",
 				_ => command.GetType().Name,
 			};
 		}
@@ -84,11 +84,6 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				writer.WriteLine(BuildNodeText(nodes[i].Command));
 				WriteTreeRec(writer, nodes[i], indent + 1);
 			}
-		}
-
-		static string ReformatText(string text)
-		{
-			return Regex.Replace(text, @"(\r|\n|\r\n)+", " ").Trim();
 		}
 	}
 }

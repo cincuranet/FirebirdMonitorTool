@@ -1,5 +1,6 @@
 using System;
 using FirebirdMonitorTool.Attachment;
+using FirebirdMonitorTool.Common;
 using FirebirdMonitorTool.Context;
 using FirebirdMonitorTool.Error;
 using FirebirdMonitorTool.Function;
@@ -165,7 +166,7 @@ namespace FirebirdMonitorTool
 			}
 			else
 			{
-				throw new InvalidOperationException($"Unable to parse command '{parsedCommand.Command}' from '{parsedCommand.TimeStamp.ToString(RawCommand.TimeStampFormat)}'.");
+				throw new InvalidOperationException($"Unable to parse command.{Environment.NewLine}Command: '{parsedCommand.Command}'{Environment.NewLine}Message: '{parsedCommand.TraceMessage.Escape()}'.");
 			}
 		}
 
