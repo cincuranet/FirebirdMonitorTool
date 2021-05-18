@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Trigger
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*(?<TriggerName>.+?)(\sFOR\s(?<TableName>.+))?\s\((?<Action>.+)\)",
+				@"^\s*(?<TriggerName>.+?)(\sFOR\s(?<TableName>.+))?\s\((?<Action>.+?)\)",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 		public ParseTrigger(RawCommand rawCommand)
