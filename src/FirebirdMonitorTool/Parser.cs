@@ -166,7 +166,7 @@ namespace FirebirdMonitorTool
 			}
 			else
 			{
-				throw new InvalidOperationException($"Unable to parse command.{Environment.NewLine}Command: '{parsedCommand.Command}'{Environment.NewLine}Message: '{parsedCommand.TraceMessage.Escape()}'.");
+				throw new InvalidOperationException($"Unable to parse command.{Environment.NewLine}Command: '{parsedCommand.Command}'{Environment.NewLine}Message: '{parsedCommand.TraceMessage.Escape()}'");
 			}
 		}
 
