@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Context
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*\[(?<Namespace>.+)\]\s(?<Variable>.+) = (""(?<Value>.+)""|(NULL))",
+				@"^\s*\[(?<Namespace>.+)\]\s(?<Variable>.+) = (""(?<Value>.*)""|(NULL))",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 		public ParseSetContext(RawCommand rawCommand)

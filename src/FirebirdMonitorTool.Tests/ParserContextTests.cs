@@ -32,5 +32,19 @@ namespace FirebirdMonitorTool.Tests
 			Assert.AreEqual("CTX_SYNC_RUNNING", result.VariableName);
 			Assert.AreEqual(null, result.Value);
 		}
+
+		[Test]
+		public void SetContextEmptyValue()
+		{
+			var header = "2021-03-31T19:47:38.0030 (3148:000000019853E3C0) SET_CONTEXT";
+			var message = @"	E:\DB\XXX\XXX.FDB (ATT_252823, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49804)
+	E:\www\xxx.com\:12480
+		(TRA_216128, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+[USER_TRANSACTION] FOOBAR = """"";
+			var result = Parse<ISetContext>(header, message);
+			Assert.AreEqual("USER_TRANSACTION", result.Namespace);
+			Assert.AreEqual("FOOBAR", result.VariableName);
+			Assert.AreEqual("", result.Value);
+		}
 	}
 }
