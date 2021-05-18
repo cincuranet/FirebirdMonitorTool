@@ -80,9 +80,9 @@ namespace FirebirdMonitorTool.Common
 				{
 					//  With Plan
 					var split = EmptyLineSplitter.Split(Text[(index + PlanSeparator.Length)..].Trim(), 2).ToList();
-					Text = Text.Substring(0, index).TrimEnd();
+					Text = Text.Substring(0, index).Trim();
 					Plan = split[0];
-					Params = split.ElementAtOrDefault(1);
+					Params = split.ElementAtOrDefault(1)?.Trim();
 				}
 				else
 				{
@@ -90,7 +90,7 @@ namespace FirebirdMonitorTool.Common
 					var split = EmptyLineSplitter.Split(Text, 2).ToList();
 					Text = split[0];
 					Plan = null;
-					Params = split.ElementAtOrDefault(1);
+					Params = split.ElementAtOrDefault(1)?.Trim();
 				}
 			}
 

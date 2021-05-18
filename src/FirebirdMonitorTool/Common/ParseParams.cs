@@ -6,7 +6,7 @@ namespace FirebirdMonitorTool.Common
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*(?<Params>\s*[\u0000-\uFFFF]*\r)\s*\d+\sms",
+				@"^\s*(?<Params>[\u0000-\uFFFF]*?)\s*\d+\sms",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		public string Message { get; private set; }
@@ -26,7 +26,7 @@ namespace FirebirdMonitorTool.Common
 			if (result)
 			{
 				var paramsGroup = match.Groups["Params"];
-				var paramsValue = paramsGroup.Value.Trim();
+				var paramsValue = paramsGroup.Value;
 				if (paramsValue == string.Empty)
 				{
 					paramsValue = null;

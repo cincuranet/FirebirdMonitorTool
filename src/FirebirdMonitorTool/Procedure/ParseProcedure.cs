@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Procedure
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*Procedure (?<ProcedureName>.+):",
+				@"^\s*Procedure (?<ProcedureName>.+):((\r\s*)|(\s*$))",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 		protected ParseProcedure(RawCommand rawCommand)
