@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using FirebirdMonitorTool.Attachment;
 using FirebirdMonitorTool.Common;
 using FirebirdMonitorTool.Context;
@@ -17,8 +16,8 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 {
 	class Profiler : IDisposable
 	{
-		StreamWriter _writer;
-		TraceTreeBuilder _builder;
+		readonly StreamWriter _writer;
+		readonly TraceTreeBuilder _builder;
 
 		public Profiler(Stream output)
 		{
