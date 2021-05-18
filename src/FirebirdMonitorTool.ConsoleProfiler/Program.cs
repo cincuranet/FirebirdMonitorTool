@@ -118,7 +118,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 					| FbDatabaseTraceEvents.Context
 					| FbDatabaseTraceEvents.Errors
 					| FbDatabaseTraceEvents.PrintPerf
-					| FbDatabaseTraceEvents.ExplainPlan,
+					| FbDatabaseTraceEvents.PrintPlan | FbDatabaseTraceEvents.ExplainPlan,
 				TimeThreshold = TimeSpan.Zero,
 			};
 			if (!string.IsNullOrWhiteSpace(database))
