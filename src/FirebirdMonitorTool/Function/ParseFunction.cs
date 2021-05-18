@@ -7,7 +7,7 @@ namespace FirebirdMonitorTool.Function
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*Function (?<FunctionName>.+):((\r\s*)|(\s*$))",
+				@"^\s*Function (?<FunctionName>.+?):((\r\s*)|(\s*$))",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 		public ParseFunction(RawCommand rawCommand)

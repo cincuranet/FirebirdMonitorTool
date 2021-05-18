@@ -94,5 +94,22 @@ param0 = bigint, ""13261594705785000""", result.Params);
 			Assert.AreEqual(null, result.Marks);
 			Assert.AreEqual(null, result.TableCounts);
 		}
+
+		[Test]
+		public void FunctionFinishRawMessage01()
+		{
+			var header = "2021-03-31T19:47:24.2860 (3148:000000007ED41EC0) EXECUTE_FUNCTION_FINISH";
+			var message = "\tE:\\DB\\XXX\\XXX.FDB (ATT_384570, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/59104)\r \tE:\\www\\xxx.com\\:2232\r \t\t(TRA_385055, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)\r \r Function INTERNALS.CS_VERSION_START:\r param0 = varchar(1024), \"E:\\DB\\XXX\\XXX.FDB\"\r param1 = bigint, \"385055\"\r \r returns:\r param0 = bigint, \"13265967581068000\"\r \r       4 ms\r \r ";
+			var result = Parse<IFunctionEnd>(header, message);
+			Assert.AreEqual("INTERNALS.CS_VERSION_START", result.FunctionName);
+			Assert.AreEqual("param0 = varchar(1024), \"E:\\DB\\XXX\\XXX.FDB\"\r param1 = bigint, \"385055\"\r \r returns:\r param0 = bigint, \"13265967581068000\"", result.Params);
+			Assert.AreEqual(null, result.RecordsFetched);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(4), result.ElapsedTime);
+			Assert.AreEqual(null, result.Reads);
+			Assert.AreEqual(null, result.Writes);
+			Assert.AreEqual(null, result.Fetches);
+			Assert.AreEqual(null, result.Marks);
+			Assert.AreEqual(null, result.TableCounts);
+		}
 	}
 }
