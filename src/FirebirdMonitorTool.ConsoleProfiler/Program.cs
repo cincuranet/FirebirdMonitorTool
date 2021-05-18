@@ -120,6 +120,8 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 					| FbDatabaseTraceEvents.PrintPerf
 					| FbDatabaseTraceEvents.PrintPlan | FbDatabaseTraceEvents.ExplainPlan,
 				TimeThreshold = TimeSpan.Zero,
+				MaxArgumentLength = 1000,
+				MaxSQLLength = 10000,
 			};
 			if (!string.IsNullOrWhiteSpace(database))
 			{
