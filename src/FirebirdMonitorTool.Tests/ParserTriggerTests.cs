@@ -80,7 +80,7 @@ namespace FirebirdMonitorTool.Tests
 		public void TriggerFinishRawMessage01()
 		{
 			var header = "2021-03-31T19:47:25.4230 (3148:000000007ED424C0) EXECUTE_TRIGGER_FINISH";
-			var message = "\tE:\\DB\\XXX\\XXx.FDB (ATT_228222, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/52857)\r \tE:\\www\\xxx.com\\:4804\r \t\t(TRA_682607, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)\r \tW_ND_UPD FOR T_NODE (AFTER UPDATE) \r       0 ms, 7 fetch(es)\r \r Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge\r ***************************************************************************************************************\r T_FUNBOO                                2                                                                      \r \r";
+			var message = "\tE:\\DB\\XXX\\XXX.FDB (ATT_228222, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/52857)\r \tE:\\www\\xxx.com\\:4804\r \t\t(TRA_682607, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)\r \tW_ND_UPD FOR T_NODE (AFTER UPDATE) \r       0 ms, 7 fetch(es)\r \r Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge\r ***************************************************************************************************************\r T_FUNBOO                                2                                                                      \r \r";
 			var result = Parse<ITriggerEnd>(header, message);
 			Assert.AreEqual("W_ND_UPD", result.TriggerName);
 			Assert.AreEqual("T_NODE", result.TableName);
