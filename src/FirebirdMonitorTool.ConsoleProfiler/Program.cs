@@ -88,10 +88,8 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 
 		static Stream OpenFileOrConsole(string? file)
 		{
-			return File.Exists(file)
-#pragma warning disable CS8604
+			return !string.IsNullOrEmpty(file)
 				? File.OpenWrite(file)
-#pragma warning restore CS8604
 				: Console.OpenStandardOutput();
 		}
 
