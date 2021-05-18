@@ -16,7 +16,7 @@ namespace FirebirdMonitorTool.Tests
 			var result = Parse<ISetContext>(header, message);
 			Assert.AreEqual("USER_TRANSACTION", result.Namespace);
 			Assert.AreEqual("CTX_VERSION", result.VariableName);
-			Assert.AreEqual(@"""13261594697357000""", result.Value);
+			Assert.AreEqual(@"13261594697357000", result.Value);
 		}
 
 		[Test]
@@ -30,7 +30,7 @@ namespace FirebirdMonitorTool.Tests
 			var result = Parse<ISetContext>(header, message);
 			Assert.AreEqual("USER_TRANSACTION", result.Namespace);
 			Assert.AreEqual("CTX_SYNC_RUNNING", result.VariableName);
-			Assert.AreEqual(@"NULL", result.Value);
+			Assert.AreEqual(null, result.Value);
 		}
 	}
 }
