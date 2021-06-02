@@ -91,6 +91,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				Port = port ?? 3050,
 				UserID = user,
 				Password = password,
+				PacketSize = short.MaxValue,
 			}.ToString();
 			var trace = new FbTrace(FbTraceVersion.Detect, connectionString);
 			var configuration = new FbDatabaseTraceConfiguration()
@@ -114,6 +115,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				configuration.DatabaseName = database;
 			}
 			trace.DatabasesConfigurations.Add(configuration);
+			trace.QueryBufferSize = short.MaxValue;
 			return trace;
 		}
 	}
