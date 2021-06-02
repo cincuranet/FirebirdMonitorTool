@@ -30,6 +30,13 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				_writer.WriteLine();
 				_writer.Flush();
 			};
+			_builder.OnError += (sender, exception) =>
+			{
+				_builder.Reset();
+				_writer.WriteLine(exception.ToString());
+				_writer.WriteLine();
+				_writer.Flush();
+			};
 		}
 
 		public void Process(string input)

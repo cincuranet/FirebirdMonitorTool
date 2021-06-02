@@ -70,6 +70,11 @@ namespace FirebirdMonitorTool
 			_monitor.Flush();
 		}
 
+		public void Reset()
+		{
+			_liveNodes.Clear();
+		}
+
 		void ProcessCommand(ICommand command)
 		{
 			switch (command)

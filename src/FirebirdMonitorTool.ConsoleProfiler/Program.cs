@@ -9,14 +9,8 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 {
 	class Program
 	{
-		interface IFileOutput
-		{
-			[Option('o', "output", Required = false, HelpText = "Output file (will be overwritten if exists).")]
-			string? Output { get; set; }
-		}
-
 		[Verb("live", isDefault: true, HelpText = "Live profiling from server.")]
-		class LiveOptions : IFileOutput
+		class LiveOptions
 		{
 			[Option('s', "server", Required = true, HelpText = "Server to connect to.")]
 			public string Server { get; set; } = default!;
@@ -32,17 +26,13 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 
 			[Option('d', "database", Required = false, HelpText = "Database to trace.")]
 			public string? Database { get; set; }
-
-			public string? Output { get; set; }
 		}
 
 		[Verb("file", HelpText = "Process a trace file (file needs to have proper data).")]
-		class FileOptions : IFileOutput
+		class FileOptions
 		{
 			[Option('i', "input", Required = true, HelpText = "File to be processed.")]
 			public string Input { get; set; } = default!;
-
-			public string? Output { get; set; }
 		}
 
 		static int Main(string[] args)
@@ -57,40 +47,38 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 
 		static void ProfileLive(LiveOptions options)
 		{
-			using (var stream = OpenFileOrConsole(options.Output))
+			Profile(profiler =>
 			{
-				using (var profiler = new Profiler(stream))
+				var trace = PrepareTrace(options.Server, options.Port, options.User, options.Password, options.Database);
+				trace.ServiceOutput += (sender, e) =>
 				{
-					var trace = PrepareTrace(options.Server, options.Port, options.User, options.Password, options.Database);
-					trace.ServiceOutput += (sender, e) =>
-					{
-						profiler.Process(e.Message);
-					};
-					trace.Start(nameof(FirebirdMonitorTool));
-				}
-			}
+					profiler.Process(e.Message);
+				};
+				trace.Start(nameof(FirebirdMonitorTool));
+			});
 		}
 
 		static void ProfileFile(FileOptions options)
 		{
-			using (var stream = OpenFileOrConsole(options.Output))
+			Profile(profiler =>
+			{
+				foreach (var line in File.ReadLines(options.Input))
+				{
+					profiler.Process(line + Environment.NewLine);
+				}
+				profiler.Flush();
+			});
+		}
+
+		static void Profile(Action<Profiler> action)
+		{
+			using (var stream = Console.OpenStandardOutput())
 			{
 				using (var profiler = new Profiler(stream))
 				{
-					foreach (var line in File.ReadLines(options.Input))
-					{
-						profiler.Process(line + Environment.NewLine);
-					}
-					profiler.Flush();
+					action(profiler);
 				}
 			}
-		}
-
-		static Stream OpenFileOrConsole(string? file)
-		{
-			return !string.IsNullOrEmpty(file)
-				? File.OpenWrite(file)
-				: Console.OpenStandardOutput();
 		}
 
 		static FbTrace PrepareTrace(string server, int? port, string user, string password, string? database)
