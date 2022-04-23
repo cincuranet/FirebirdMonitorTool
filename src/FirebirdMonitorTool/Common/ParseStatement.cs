@@ -17,12 +17,12 @@ namespace FirebirdMonitorTool.Common
 
 		static readonly Regex ParserNone =
 			new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\s?\r?\s?-{79}\r?\s?(?<Text>[\u0000-\uFFFF]*)",
+				@"^\s*(Statement\s(?<StatementId>\d+):\s?\r?)?\s?-{79}\r?\s?(?<Text>[\u0000-\uFFFF]*)",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		static readonly Regex ParserRecordsFetched =
 			new Regex(
-				@"^\s*Statement\s(?<StatementId>\d+):\s?\r?\s?-{79}\r?\s?(?<Text>[\u0000-\uFFFF]*)\r?\s?(?<Number>\d+)\srecords fetched",
+				@"^\s*(Statement\s(?<StatementId>\d+):\s?\r?)?\s?-{79}\r?\s?(?<Text>[\u0000-\uFFFF]*)\r?\s?(?<Number>\d+)\srecords fetched",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		static readonly Regex ParserElapsedTime =

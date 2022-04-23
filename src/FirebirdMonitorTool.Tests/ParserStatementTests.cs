@@ -628,5 +628,70 @@ param11 = bigint, ""3673230""", result.Params);
 			Assert.AreEqual(null, result.Plan);
 			Assert.AreEqual("param0 = bigint, \"3417443\"\r param1 = timestamp, \"2021-05-16T12:52:22.1717\"", result.Params);
 		}
+
+		[Test]
+		public void PrepareStatementWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) PREPARE_STATEMENT";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+      0 ms
+
+";
+			var result = Parse<IStatementPrepare>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+		}
+
+		[Test]
+		public void ExecuteStatemenStartWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) EXECUTE_STATEMENT_START";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+";
+			var result = Parse<IStatementStart>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+		}
+
+		[Test]
+		public void ExecuteStatemenFinishWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) EXECUTE_STATEMENT_FINISH";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, INIT_19553736, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+0 records fetched
+      0 ms
+
+";
+			var result = Parse<IStatementFinish>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+			Assert.AreEqual(0, result.RecordsFetched);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+		}
 	}
 }
