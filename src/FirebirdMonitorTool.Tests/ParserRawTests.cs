@@ -26,5 +26,17 @@ namespace FirebirdMonitorTool.Tests
 			Assert.AreEqual(1679068224, command.InternalTraceId);
 			Assert.AreEqual("EXECUTE_STATEMENT_START", command.Command);
 		}
+
+		[Test]
+		public void HeaderWithPrefixedAndLowercaseInternalTraceId()
+		{
+			var header = "2021-03-31T19:47:25.7120 (3148:0x7f63f87172c0) EXECUTE_STATEMENT_START";
+			var command = RawCommand.TryMatch(header);
+			Assert.NotNull(command);
+			Assert.AreEqual(new DateTime(2021, 03, 31, 19, 47, 25, 712), command.TimeStamp);
+			Assert.AreEqual(3148, command.ServerProcessId);
+			Assert.AreEqual(140067346674368, command.InternalTraceId);
+			Assert.AreEqual("EXECUTE_STATEMENT_START", command.Command);
+		}
 	}
 }

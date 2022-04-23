@@ -230,6 +230,73 @@ param1 = bigint, ""9084653""", result.Params);
 		}
 
 		[Test]
+		public void FinishWithTableCountsAndWithSpacesAfterStatementLineAndTableHeaderLines()
+		{
+			var header = "2021-03-31T19:47:27.2050 (3148:000000007ED41EC0) EXECUTE_STATEMENT_FINISH";
+			var message = @"	E:\DB\XXX.FDB (ATT_5555478, CLIENT:NONE, UTF8, TCPv4:127.0.0.1/49683)
+    E:\www\xxx.com\:20204
+        (TRA_16322458, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+Statement 28014406: 
+-------------------------------------------------------------------------------
+UPDATE ""T_CLIENT_HEARTBEAT"" SET ""F_CLH_LAST""=? WHERE ( ""T_CLIENT_HEARTBEAT"".""F_CLH_ID"" = ?)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PLAN (T_CLIENT_HEARTBEAT INDEX (PK_T_CLIENT_HEARTBEAT))
+
+param0 = timestamp, ""2021-03-31T17:47:25.8012""
+param1 = bigint, ""9084653""
+
+0 records fetched
+      0 ms, 35 fetch(es), 3 mark(s)
+
+Table                             Natural     Index    Update    Insert    Delete   Backout     Purge   Expunge 
+*************************************************************************************************************** 
+RDB$INDICES                                       7                                                            
+RDB$RELATION_CONSTRAINTS                          1                                                            
+T_CLIENT_HEARTBEAT                                1         1                                                  ";
+			var result = Parse<IStatementFinish>(header, message);
+			Assert.AreEqual(28014406, result.StatementId);
+			Assert.AreEqual(@"UPDATE ""T_CLIENT_HEARTBEAT"" SET ""F_CLH_LAST""=? WHERE ( ""T_CLIENT_HEARTBEAT"".""F_CLH_ID"" = ?)", result.Text);
+			Assert.AreEqual("PLAN (T_CLIENT_HEARTBEAT INDEX (PK_T_CLIENT_HEARTBEAT))", result.Plan);
+			Assert.AreEqual(@"param0 = timestamp, ""2021-03-31T17:47:25.8012""
+param1 = bigint, ""9084653""", result.Params);
+			Assert.AreEqual(0, result.RecordsFetched);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+			Assert.AreEqual(null, result.Reads);
+			Assert.AreEqual(null, result.Writes);
+			Assert.AreEqual(35, result.Fetches);
+			Assert.AreEqual(3, result.Marks);
+			Assert.AreEqual(3, result.TableCounts.Count);
+			Assert.AreEqual("RDB$INDICES", result.TableCounts[0].Name);
+			Assert.AreEqual(null, result.TableCounts[0].Natural);
+			Assert.AreEqual(7, result.TableCounts[0].Index);
+			Assert.AreEqual(null, result.TableCounts[0].Update);
+			Assert.AreEqual(null, result.TableCounts[0].Insert);
+			Assert.AreEqual(null, result.TableCounts[0].Delete);
+			Assert.AreEqual(null, result.TableCounts[0].Backout);
+			Assert.AreEqual(null, result.TableCounts[0].Purge);
+			Assert.AreEqual(null, result.TableCounts[0].Expunge);
+			Assert.AreEqual("RDB$RELATION_CONSTRAINTS", result.TableCounts[1].Name);
+			Assert.AreEqual(null, result.TableCounts[1].Natural);
+			Assert.AreEqual(1, result.TableCounts[1].Index);
+			Assert.AreEqual(null, result.TableCounts[1].Update);
+			Assert.AreEqual(null, result.TableCounts[1].Insert);
+			Assert.AreEqual(null, result.TableCounts[1].Delete);
+			Assert.AreEqual(null, result.TableCounts[1].Backout);
+			Assert.AreEqual(null, result.TableCounts[1].Purge);
+			Assert.AreEqual(null, result.TableCounts[1].Expunge);
+			Assert.AreEqual("T_CLIENT_HEARTBEAT", result.TableCounts[2].Name);
+			Assert.AreEqual(null, result.TableCounts[2].Natural);
+			Assert.AreEqual(1, result.TableCounts[2].Index);
+			Assert.AreEqual(1, result.TableCounts[2].Update);
+			Assert.AreEqual(null, result.TableCounts[2].Insert);
+			Assert.AreEqual(null, result.TableCounts[2].Delete);
+			Assert.AreEqual(null, result.TableCounts[2].Backout);
+			Assert.AreEqual(null, result.TableCounts[2].Purge);
+			Assert.AreEqual(null, result.TableCounts[2].Expunge);
+		}
+
+		[Test]
 		public void PrepareExplainedPlan()
 		{
 			var header = "2021-04-27T19:16:31.2800 (30360:000000010DAB0E40) PREPARE_STATEMENT";
@@ -560,6 +627,71 @@ param11 = bigint, ""3673230""", result.Params);
 			Assert.AreEqual("DELETE FROM \"T_CLIENT_RECENT_EMAIL\" WHERE ( ( \"T_CLIENT_RECENT_EMAIL\".\"F_CL_ID\" = ? AND \"T_CLIENT_RECENT_EMAIL\".\"F_CLRE_UPDATED\" < ?))", result.Text);
 			Assert.AreEqual(null, result.Plan);
 			Assert.AreEqual("param0 = bigint, \"3417443\"\r param1 = timestamp, \"2021-05-16T12:52:22.1717\"", result.Params);
+		}
+
+		[Test]
+		public void PrepareStatementWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) PREPARE_STATEMENT";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+      0 ms
+
+";
+			var result = Parse<IStatementPrepare>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+		}
+
+		[Test]
+		public void ExecuteStatemenStartWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) EXECUTE_STATEMENT_START";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+";
+			var result = Parse<IStatementStart>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+		}
+
+		[Test]
+		public void ExecuteStatemenFinishWithoutStatementId()
+		{
+			var header = "2022-04-23T19:45:09.0600 (742989:000000007ED41EC0) EXECUTE_STATEMENT_FINISH";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:www\xxx.com\:5332
+		(TRA_21442862, INIT_19553736, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+
+-------------------------------------------------------------------------------
+SET GENERATOR maxnumber TO 1000951985
+
+
+0 records fetched
+      0 ms
+
+";
+			var result = Parse<IStatementFinish>(header, message);
+			Assert.AreEqual(null, result.StatementId);
+			Assert.AreEqual("SET GENERATOR maxnumber TO 1000951985", result.Text);
+			Assert.AreEqual(null, result.Plan);
+			Assert.AreEqual(0, result.RecordsFetched);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
 		}
 	}
 }

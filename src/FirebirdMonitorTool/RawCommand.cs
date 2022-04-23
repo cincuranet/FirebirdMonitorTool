@@ -9,7 +9,7 @@ namespace FirebirdMonitorTool
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^(?<TimeStamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{4})\s+\((?<ServerProcessId>\d+):(?<InternalTraceId>[0-9,A-F]+)\)\s+(?<Command>[0-9,A-Z,a-z,_,\x20,:]+)\s*$",
+				@"^(?<TimeStamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{4})\s+\((?<ServerProcessId>\d+):(0x)?(?<InternalTraceId>[0-9,A-F,a-f]+)\)\s+(?<Command>[0-9,A-Z,a-z,_,\x20,:]+)\s*$",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
 		public static string TimeStampFormat { get; } = @"yyyy-MM-ddTHH:mm:ss\.ffff";

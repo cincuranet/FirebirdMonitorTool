@@ -22,8 +22,8 @@ namespace FirebirdMonitorTool.Common
 		{
 			var strings = Message.TrimStart().Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 			if (strings.Length > 2
-				&& strings[0].EndsWith(HeaderLine, StringComparison.InvariantCulture)
-				&& strings[1].EndsWith(HeaderSeparator, StringComparison.InvariantCulture))
+				&& strings[0].TrimEnd().EndsWith(HeaderLine, StringComparison.InvariantCulture)
+				&& strings[1].TrimEnd().EndsWith(HeaderSeparator, StringComparison.InvariantCulture))
 			{
 				TableCounts = GetTableCounts(strings.Skip(2)).ToList();
 				return true;

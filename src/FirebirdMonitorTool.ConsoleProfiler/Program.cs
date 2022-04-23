@@ -52,7 +52,7 @@ namespace FirebirdMonitorTool.ConsoleProfiler
 				var trace = PrepareTrace(options.Server, options.Port, options.User, options.Password, options.Database);
 				trace.ServiceOutput += (sender, e) =>
 				{
-					profiler.Process(e.Message);
+					profiler.Process(e.Message + Environment.NewLine);
 				};
 				trace.Start(nameof(FirebirdMonitorTool));
 			});
