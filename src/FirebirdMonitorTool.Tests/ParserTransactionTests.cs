@@ -1,4 +1,5 @@
 ﻿using System;
+using FirebirdMonitorTool.Statement;
 using FirebirdMonitorTool.Transaction;
 using NUnit.Framework;
 
@@ -63,6 +64,23 @@ namespace FirebirdMonitorTool.Tests
 			Assert.AreEqual(null, result.Writes);
 			Assert.AreEqual(1, result.Fetches);
 			Assert.AreEqual(1, result.Marks);
+		}
+
+		[Test]
+		public void StartRawWithInitialTransactionId()
+		{
+			var header = "2022-04-23T19:45:09.2090 (742989:00000001985311C0) START_TRANSACTION";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:\www\xxx.com\:20204
+		(TRA_21442820, INIT_19553709, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)";
+			var result = Parse<ITransactionStart>(header, message);
+			Assert.AreEqual(21442820, result.TransactionId);
+			Assert.AreEqual(19553709, result.InitialTransactionId);
+			Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
+			Assert.AreEqual(true, result.RecordVersion);
+			Assert.AreEqual(false, result.Wait);
+			Assert.AreEqual(null, result.WaitTime);
+			Assert.AreEqual(false, result.ReadOnly);
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace FirebirdMonitorTool.Transaction
 	{
 		static readonly Regex Parser =
 			new Regex(
-				@"^\s*\(TRA_(?<TransactionId>\d+),\s(?<IsolationParams>[\w,\d,\|, ]+)\)",
+				@"^\s*\(TRA_(?<TransactionId>\d+)(,\sINIT_(?<InitialTransactionId>\d+))?,\s(?<IsolationParams>[\w,\d,\|, ]+)\)",
 				RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 		static readonly Regex ParserWait =
@@ -23,6 +23,7 @@ namespace FirebirdMonitorTool.Transaction
 		}
 
 		public long TransactionId { get; private set; }
+		public long? InitialTransactionId { get; private set; }
 		public string IsolationMode { get; private set; }
 		public bool? RecordVersion { get; private set; }
 		public bool Wait { get; private set; }
@@ -40,6 +41,7 @@ namespace FirebirdMonitorTool.Transaction
 				if (result)
 				{
 					TransactionId = long.Parse(match.Groups["TransactionId"].Value);
+					InitialTransactionId = match.Groups["InitialTransactionId"].Success ? long.Parse(match.Groups["InitialTransactionId"].Value) : default(long?);
 					var isolationParams = match.Groups["IsolationParams"].Value;
 					var strings = isolationParams.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
 						.Select(s => s.Trim())
