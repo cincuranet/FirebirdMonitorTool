@@ -82,5 +82,29 @@ namespace FirebirdMonitorTool.Tests
 			Assert.AreEqual(null, result.WaitTime);
 			Assert.AreEqual(false, result.ReadOnly);
 		}
+
+		[Test]
+		public void EndWithNewTransactionNumber()
+		{
+			var header = "2022-04-23T19:45:09.2100 (742989:0x7f63f8715ec0) COMMIT_RETAINING";
+			var message = @"	E:\DB\XXX.FDB (ATT_475059, SYSDBA:NONE, NONE, TCPv4:192.168.123.154/65068)
+	E:\www\xxx.com\:20204
+		(TRA_21442820, INIT_19553709, READ_COMMITTED | REC_VERSION | NOWAIT | READ_WRITE)
+	New number 21442867
+      0 ms, 9 write(s), 2 fetch(es), 2 mark(s)";
+			var result = Parse<ITransactionEnd>(header, message);
+			Assert.AreEqual(21442820, result.TransactionId);
+			Assert.AreEqual(19553709, result.InitialTransactionId);
+			Assert.AreEqual(21442867, result.NewTransactionId);
+			Assert.AreEqual("READ_COMMITTED", result.IsolationMode);
+			Assert.AreEqual(true, result.RecordVersion);
+			Assert.AreEqual(false, result.Wait);
+			Assert.AreEqual(null, result.WaitTime);
+			Assert.AreEqual(false, result.ReadOnly);
+			Assert.AreEqual(TimeSpan.FromMilliseconds(0), result.ElapsedTime);
+			Assert.AreEqual(9, result.Writes);
+			Assert.AreEqual(2, result.Fetches);
+			Assert.AreEqual(2, result.Marks);
+		}
 	}
 }
